@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Главная</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2><a href="index.html">Меню</a></h2>
+  <ul>
+    <li><a th:href="@{/about}">Легкие задания</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+    <li><a th:href="@{/services}">Средние задания</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+    <li><a th:href="@{/contact}">Сложные задания</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+    <form th:action="@{/logout}" method="post">
+      <input type="submit" value="Sign Out"/>
+    </form>
+  </ul>
+</div>
+
+<div class="main">
+  <h1 style="color: #3f1495">Средние задания </h1>
+</div>
+<div class="container_cards">
+  <div class="card_5">
+    <h3 class="title">Задание 1</h3>
+    <h5 class="title_2">сложность</h5>
+    <div class="bar">
+      <div class="emptybar"></div>
+      <div class="filledbar"></div>
+    </div>
+    <div class="circle">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <circle class="stroke" cx="60" cy="60" r="50"/>
+        <h4><a class="circle_text" href="index.html">Начать</a></h4>
+
+      </svg>
+    </div>
+  </div>
+  <div class="card_6">
+    <h3 class="title">Задание 2</h3>
+    <h5 class="title_2">сложность</h5>
+    <div class="bar">
+      <div class="emptybar"></div>
+      <div class="filledbar"></div>
+    </div>
+    <div class="circle">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <circle class="stroke" cx="60" cy="60" r="50"/>
+        <h4><a class="circle_text" href="index.html">Начать</a></h4>
+      </svg>
+    </div>
+  </div>
+  <div class="card_7">
+    <h3 class="title">Задание 3</h3>
+    <h5 class="title_2">сложность</h5>
+    <div class="bar">
+      <div class="emptybar"></div>
+      <div class="filledbar"></div>
+    </div>
+    <div class="circle">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <circle class="stroke" cx="60" cy="60" r="50"/>
+        <h4><a class="circle_text" href="index.html">Начать</a></h4>
+      </svg>
+    </div>
+  </div>
+  <div class="card_8">
+    <h3 class="title">Задание 4</h3>
+    <h5 class="title_2">сложность</h5>
+    <div class="bar">
+      <div class="emptybar"></div>
+      <div class="filledbar"></div>
+    </div>
+    <div class="circle">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <circle class="stroke" cx="60" cy="60" r="50"/>
+        <h4><a class="circle_text" href="index.html">Начать</a></h4>
+      </svg>
+    </div>
+  </div>
+</div>
+
+
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.body.classList.add('loaded');
+  });
+</script>
+</body>
+</html>
