@@ -2,12 +2,31 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 <head>
   <title>Spring Security Example</title>
-
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: antiquewhite;
+      margin: 0;
+      display: flex;
+      height: auto;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      margin-left: 40%;
+      margin-top: 15%;
+    }
+  </style>
 
 </head>
 <body>
+<div class="container">
 <h1>Welcome!</h1>
 
 <p>Нажмите <a th:href="@{/hello}">здесь,</a> чтобы продолжить.</p>
+</div>
 </body>
 </html>
