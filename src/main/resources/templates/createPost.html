@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Создать пост</title>
+    <meta charset="UTF-8" />
+
+    <style>
+        body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 40px auto; background: #f5f5f7; padding: 20px; border-radius: 8px;}
+        form { display: flex; flex-direction: column; }
+        label { margin-top: 15px; font-weight: bold; }
+        input[type="text"], textarea { padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; }
+        button { margin-top: 20px; padding: 10px; background-color: #007bff; color: white; font-weight: 600; border: none; cursor: pointer; border-radius: 5px; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2><a th:href="@{/hello}">Главная</a></h2>
+    <ul>
+        <li><a th:href="@{/posts/create}">Создать пост</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+        <li><a th:href="@{/posts}">Посты</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+        <li><a th:href="@{/contact}">Пользователи</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+        <form th:action="@{/logout}" method="post">
+            <input type="submit" value="Sign Out"/>
+        </form>
+    </ul>
+</div>
+<h1>Создать новый пост</h1>
+<form th:action="@{/posts/create}" th:object="${post}" method="post">
+    <label for="title">Заголовок</label>
+    <input type="text" id="title" name="title" th:field="*{title}" placeholder="Введите заголовок" required />
+
+    <label for="content">Содержание</label>
+    <textarea id="content" name="content" th:field="*{content}" rows="6" placeholder="Введите содержание поста" required></textarea>
+
+    <button type="submit">Создать</button>
+</form>
+</body>
+</html>
