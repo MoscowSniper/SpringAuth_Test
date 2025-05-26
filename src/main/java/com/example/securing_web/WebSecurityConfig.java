@@ -45,5 +45,6 @@ public class WebSecurityConfig {
                 .build();
 
         return new InMemoryUserDetailsManager(user1, user2);
+
     }
 }

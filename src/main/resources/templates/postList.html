@@ -3,14 +3,13 @@
 <head>
   <title>Список постов</title>
   <meta charset="UTF-8" />
-
+  <link rel="stylesheet" th:href="@{/css/style.css}">
   <style>
-    body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 40px auto; background: #f5f5f7; padding: 20px; border-radius: 8px;}
     h1 { margin-bottom: 20px; }
     .post { background: white; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 0 8px rgba(0,0,0,0.05); }
     .post h2 { margin: 0 0 10px; }
-    .post p { margin: 0; white-space: pre-wrap; }
-    a { text-decoration: none; color: #007bff; }
+    .post p { white-space: pre-wrap;}
+    a {text-decoration: none;}
     a:hover { text-decoration: underline; }
   </style>
 </head>
@@ -26,14 +25,19 @@
     </form>
   </ul>
 </div>
+<div class="main">
 <h1>Посты</h1>
-<a href="/posts/create">Создать новый пост</a>
+<a href="/posts/create" style="margin-left: 45%">Создать новый пост</a>
 <div th:if="${posts.isEmpty()}">
-  <p>Посты отсутствуют.</p>
+  <p style="margin-left: 45%">Посты отсутствуют.</p>
 </div>
 <div th:each="post : ${posts}" class="post">
   <h2 th:text="${post.title}">Заголовок</h2>
   <p th:text="${post.content}">Содержание</p>
+  <form th:action="@{'/posts/delete/' + ${post.id}}" method="post" class="delete-form">
+    <button type="submit" class="delete-button" onclick="return confirm('Вы уверены, что хотите удалить этот пост?');">Удалить</button>
+  </form>
+</div>
 </div>
 </body>
 </html>
