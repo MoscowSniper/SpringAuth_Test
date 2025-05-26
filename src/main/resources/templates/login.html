@@ -1,39 +1,20 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Spring Security Example </title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: white;
-      margin: 0;
-      display: flex;
-      height: auto;
-    }
-    .container {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      width: 300px;
-      margin-left: 40%;
-      margin-top: 15%;
-    }
-  </style>
+  <title>Вход</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <div class="container">
-<div th:if="${param.error}">
-  Invalid username and password.
-</div>
-<div th:if="${param.logout}">
-  You have been logged out.
-</div>
-<form th:action="@{/login}" method="post">
-  <div><label> User Name : <input type="text" name="username"/> </label></div>
-  <div><label> Password: <input type="password" name="password"/> </label></div>
-  <div><input type="submit" value="Sign In"/></div>
-</form>
+  <h2>Вход</h2>
+  <div th:if="${error}" class="error" th:text="${error}"></div>
+  <form th:action="@{/login}" method="post">
+    <input type="text" name="username" placeholder="Имя пользователя" required />
+    <input type="password" name="password" placeholder="Пароль" required />
+    <button type="submit">Войти</button>
+  </form>
+  <p>Нет аккаунта? <a th:href="@{/register}">Зарегистрироваться</a></p>
 </div>
 </body>
 </html>
