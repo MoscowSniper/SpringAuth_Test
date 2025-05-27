@@ -19,7 +19,7 @@ public class UserService {
 
     public boolean register(String username, String password) {
         if(userRepository.findByUsername(username).isPresent()){
-            return false; // пользователь уже есть
+            return false; // если пользователель уже есть
         }
         User user = new User();
         user.setUsername(username);
