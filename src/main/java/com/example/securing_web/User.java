@@ -1,6 +1,5 @@
 package com.example.securing_web;
 
-
 import jakarta.persistence.*;
 
 @Entity

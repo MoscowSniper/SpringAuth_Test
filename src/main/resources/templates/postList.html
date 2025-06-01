@@ -17,9 +17,9 @@
 <div class="sidebar">
   <h2><a th:href="@{/hello}">Главная</a></h2>
   <ul>
-    <li><a th:href="@{/posts/create}">Создать пост</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
-    <li><a th:href="@{/posts}">Посты</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
-    <li><a th:href="@{/contact}">Пользователи</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+    <li><a th:href="@{/posts/create}">Создать пост</a></li>
+    <li><a th:href="@{/posts}">Посты</a></li>
+    <li><a th:href="@{/contact}">Пользователи</a></li>
     <form th:action="@{/logout}" method="post">
       <input type="submit" value="Sign Out"/>
     </form>
@@ -27,17 +27,22 @@
 </div>
 <div class="main">
 <h1>Посты</h1>
+  <form action="/posts/search" method="get">
+    <input type="text" name="query" placeholder="Поиск по постам" required>
+    <button type="submit">Поиск</button>
+  </form>
 <a href="/posts/create" style="margin-left: 45%">Создать новый пост</a>
 <div th:if="${posts.isEmpty()}">
   <p style="margin-left: 45%">Посты отсутствуют.</p>
 </div>
-<div th:each="post : ${posts}" class="post">
-  <h2 th:text="${post.title}">Заголовок</h2>
-  <p th:text="${post.content}">Содержание</p>
-  <form th:action="@{'/posts/delete/' + ${post.id}}" method="post" class="delete-form">
-    <button type="submit" class="delete-button" onclick="return confirm('Вы уверены, что хотите удалить этот пост?');">Удалить</button>
-  </form>
-</div>
+  <div th:each="post : ${posts}" class="post">
+    <h2 th:text="${post.title}">Заголовок</h2>
+    <p th:text="${post.content}">Содержание</p>
+    <p>Автор: <span th:text="${post.author}">Автор</span></p> <!-- Отображение имени автора -->
+    <form th:action="@{'/posts/delete/' + ${post.id}}" method="post" class="delete-form">
+      <button type="submit" class="delete-button" onclick="return confirm('Вы уверены, что хотите удалить этот пост?');">Удалить</button>
+    </form>
+  </div>
 </div>
 </body>
 </html>
