@@ -1,10 +1,6 @@
 package com.example.securing_web;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Post {
@@ -17,12 +13,15 @@ public class Post {
 
     private String content;
 
+    private String author; // Поле для имени автора
+
     public Post() {
     }
 
-    public Post(String title, String content) {
+    public Post(String title, String content, String author) { // Измените конструктор
         this.title = title;
         this.content = content;
+        this.author = author; // Инициализация автора
     }
 
     // Геттеры и сеттеры
@@ -48,5 +47,13 @@ public class Post {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getAuthor() { // Геттер для автора
+        return author;
+    }
+
+    public void setAuthor(String author) { // Сеттер для автора
+        this.author = author;
     }
 }

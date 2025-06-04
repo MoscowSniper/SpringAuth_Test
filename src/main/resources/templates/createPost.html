@@ -16,21 +16,22 @@
 <div class="sidebar">
     <h2><a th:href="@{/hello}">Главная</a></h2>
     <ul>
-        <li><a th:href="@{/posts/create}">Создать пост</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
-        <li><a th:href="@{/posts}">Посты</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
-        <li><a th:href="@{/contact}">Пользователи</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+        <li><a th:href="@{/posts/create}">Создать пост</a></li>
+        <li><a th:href="@{/posts}">Посты</a></li>
+        <li><a th:href="@{/contact}">Пользователи</a></li>
         <form th:action="@{/logout}" method="post">
             <input type="submit" value="Sign Out"/>
         </form>
     </ul>
 </div>
 <div class="main">
-<h1>Создать новый пост</h1>
-<form th:action="@{/posts/create}" th:object="${post}" method="post">
+<<form th:action="@{/posts/create}" th:object="${post}" method="post">
     <label for="title">Заголовок</label>
     <input type="text" id="title" name="title" th:field="*{title}" placeholder="Введите заголовок" required />
+
     <label for="content">Содержание</label>
     <textarea id="content" name="content" th:field="*{content}" rows="6" placeholder="Введите содержание поста" required></textarea>
+
     <button type="submit">Создать</button>
 </form>
 </div>
