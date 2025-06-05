@@ -1,47 +1,57 @@
-/* Базовые переменные для цветов и шрифтов */
+/* === Root variables для удобного управления цветами === */
 :root {
-    --primary-color: #4A90E2;
-    --primary-hover: #357ABD;
-    --background-color: #F5F7FA;
-    --sidebar-bg: #1F2937;
-    --sidebar-text: #E5E7EB;
-    --card-bg: #FFFFFF;
-    --text-color: #333333;
-    --border-radius: 12px;
-    --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    --font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --clr-primary: #4f46e5; /* насыщенный синий */
+    --clr-primary-light: #8b85f7;
+    --clr-primary-dark: #3c3bab;
+    --clr-accent: #f97316; /* яркий оранжевый */
+    --clr-bg: #f9fafb; /* очень светлый фон */
+    --clr-text-dark: #1f2937; /* темно-серый */
+    --clr-text-light: #6b7280; /* светло-серый */
+    --shadow: rgba(79, 70, 229, 0.3);
+    --shadow-hover: rgba(79, 70, 229, 0.5);
 }
 
-/* Сброс и базовые стили */
+/* === Глобальные стили === */
+* {
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
 body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--clr-bg);
+    color: var(--clr-text-dark);
     margin: 0;
-    background-color: var(--background-color);
-    font-family: var(--font-family);
-    color: var(--text-color);
-    display: flex;
     min-height: 100vh;
+    display: flex;
 }
 
-/* Сайдбар */
+/* === Боковое меню === */
 .sidebar {
-    width: 220px;
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-text);
-    padding: 30px 20px;
     position: fixed;
-    height: 100%;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 220px;
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-dark));
+    color: white;
+    padding: 2rem 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 30px;
-    border-top-right-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
+    box-shadow: 4px 0 15px var(--shadow);
+    z-index: 1000;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    user-select: none;
 }
 
 .sidebar h2 {
-    margin: 0;
-    font-weight: 700;
     font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.15em;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 
 .sidebar ul {
@@ -52,251 +62,208 @@ body {
 }
 
 .sidebar ul li {
-    margin-bottom: 20px;
+    margin: 1.5rem 0;
 }
 
 .sidebar ul li a {
-    color: var(--sidebar-text);
+    color: white;
+    font-size: 1.1rem;
     text-decoration: none;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: color 0.3s ease;
+    display: block;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar ul li a::before {
+    content: '';
+    position: absolute;
+    width: 120%;
+    height: 100%;
+    background: var(--clr-accent);
+    top: 0;
+    left: -110%;
+    transform: skewX(-20deg);
+    transition: left 0.4s ease;
+    z-index: 0;
+    opacity: 0.15;
+}
+
+.sidebar ul li a:hover::before {
+    left: 110%;
 }
 
 .sidebar ul li a:hover {
-    color: var(--primary-color);
-    text-decoration: underline;
+    color: var(--clr-accent);
+    box-shadow: 0 0 15px var(--clr-accent);
+    font-weight: 700;
+    z-index: 1;
 }
 
 /* Кнопка выхода */
 .sidebar form input[type="submit"] {
-    background-color: var(--primary-color);
-    border: none;
-    color: white;
-    padding: 10px 15px;
-    font-weight: 600;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    margin-top: 2rem;
+    padding: 0.7rem;
     width: 100%;
+    background: var(--clr-accent);
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--clr-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: background 0.3s ease;
 }
 
 .sidebar form input[type="submit"]:hover {
-    background-color: var(--primary-hover);
+    background: #e65c00;
+    box-shadow: 0 0 15px #e65c00;
 }
 
-/* Основной контент */
+/* === Основной контент === */
 .main {
-    margin-left: 240px;
-    padding: 40px 30px;
-    width: calc(100% - 240px);
-    background-color: var(--card-bg);
+    margin-left: 220px;
+    padding: 3rem 2rem;
+    width: 100%;
+    background: white;
     min-height: 100vh;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
-    border-top-left-radius: var(--border-radius);
-    border-bottom-left-radius: var(--border-radius);
+    box-shadow: inset 0 0 50px #f0f4ff;
+    border-radius: 16px 0 0 16px;
     overflow-y: auto;
 }
 
 /* Заголовки */
 h1 {
-    font-size: 2.4rem;
-    margin-bottom: 30px;
-    color: var(--primary-color);
-    font-weight: 700;
-    text-align: left;
+    font-size: 2.8rem;
+    color: var(--clr-primary-dark);
+    text-align: center;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
 }
 
-/* Карточки пользователей и контактов */
-.contact-info, .user {
-    background-color: var(--card-bg);
-    padding: 25px 30px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 25px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Контактная информация */
+.contact-info {
+    background: #f3f6ff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px var(--shadow);
+    max-width: 650px;
+    margin: 0 auto 3rem auto;
+    font-size: 1.1rem;
+    color: var(--clr-text-light);
+    line-height: 1.5;
+    text-align: center;
+    font-weight: 600;
 }
 
-.user:hover, .contact-info:hover {
+.contact-info strong {
+    color: var(--clr-primary);
+}
+
+/* Пользователи */
+.user {
+    background: white;
+    box-shadow: 0 5px 25px var(--shadow);
+    border-radius: 14px;
+    padding: 1.8rem 2rem;
+    margin-bottom: 1.8rem;
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.user:hover {
     transform: translateY(-6px);
-    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 35px var(--shadow-hover);
+    border-color: var(--clr-primary);
 }
 
-/* Заголовки в карточках */
 .user h2 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    font-weight: 700;
+    margin: 0 0 10px;
+    color: var(--clr-primary);
     font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
-.user p, .contact-info p {
-    margin: 6px 0;
+.user p {
+    margin: 5px 0;
     font-size: 1rem;
-    color: #555;
+    color: var(--clr-text-dark);
 }
 
 /* Ссылки */
 a {
-    color: var(--primary-color);
+    color: var(--clr-primary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    font-weight: 600;
 }
 
 a:hover {
     text-decoration: underline;
-    color: var(--primary-hover);
-}
-
-/* Футер */
-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #2C3E50;
-    color: #E0E0E0;
-    text-align: center;
-    padding: 12px 0;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-/* Формы */
-.container {
-    background-color: var(--card-bg);
-    padding: 30px 35px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    max-width: 400px;
-    margin: 10% auto 0 auto;
-    display: flex;
-    flex-direction: column;
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-label {
-    font-weight: 600;
-    margin-bottom: 8px;
-    display: block;
-    color: var(--text-color);
-}
-
-input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1.5px solid #ccc;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-}
-
-input[type="text"]:focus, input[type="password"]:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
-button {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 14px 0;
-    font-size: 1.1rem;
-    border-radius: var(--border-radius);
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 10px;
-}
-
-button:hover {
-    background-color: var(--primary-hover);
-}
-
-.register-link {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 0.95rem;
-}
-
-.register-link a {
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-.register-link a:hover {
-    text-decoration: underline;
 }
 
 /* Адаптивность */
-
-@media (max-width: 1024px) {
+@media (max-width: 900px) {
     .sidebar {
-        width: 180px;
-        padding: 25px 15px;
+        width: 160px;
+        padding: 1.5rem 1rem;
     }
-
     .main {
-        margin-left: 190px;
-        padding: 30px 20px;
-        width: calc(100% - 190px);
+        margin-left: 160px;
+        padding: 2rem 1.5rem;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     body {
         flex-direction: column;
     }
     .sidebar {
+        position: relative;
         width: 100%;
         height: auto;
-        position: relative;
-        border-radius: 0;
         box-shadow: none;
-        padding: 15px 20px;
         display: flex;
-        justify-content: space-around;
-        align-items: center;
+        justify-content: center;
+        padding: 1rem 0;
     }
-
     .sidebar ul {
         display: flex;
-        gap: 15px;
-        margin: 0;
+        justify-content: space-around;
+        width: 100%;
     }
-
     .sidebar ul li {
         margin: 0;
     }
-
     .main {
         margin-left: 0;
-        width: 100%;
-        padding: 20px 15px;
-    }
-
-    .container {
-        margin: 5% auto 0 auto;
-        width: 90%;
-        max-width: 400px;
-        padding: 25px 20px;
+        padding: 1.5rem;
+        border-radius: 0;
+        box-shadow: none;
     }
 }
 
-@media (max-width: 480px) {
-    .user, .contact-info {
-        padding: 18px 15px;
-    }
-
-    h1 {
-        font-size: 1.8rem;
-    }
+/* Красивый скролл */
+.main::-webkit-scrollbar {
+    width: 8px;
 }
+
+.main::-webkit-scrollbar-track {
+    background: #f3f6ff;
+    border-radius: 10px;
+}
+
+.main::-webkit-scrollbar-thumb {
+    background: var(--clr-primary);
+    border-radius: 10px;
+}
+
