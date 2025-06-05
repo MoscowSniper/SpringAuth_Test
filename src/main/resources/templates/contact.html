@@ -26,6 +26,19 @@
     .user p { margin: 0; }
     a { text-decoration: none; }
     a:hover { text-decoration: underline; }
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .sidebar {
+      float: left;
+      width: 200px;
+      margin-right: 30px;
+    }
+    .main {
+      margin-left: 230px;
+    }
   </style>
 </head>
 <body>
@@ -37,7 +50,7 @@
     <li><a th:href="@{/contact}">Пользователи</a></li>
     <form th:action="@{/logout}" method="post">
       <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-      <input type="submit" value="Sign Out"/>
+      <input type="submit" value="Выйти"/>
     </form>
   </ul>
 </div>
@@ -59,6 +72,10 @@
   </div>
 
   <div th:each="user : ${users}" class="user">
-    <h2 th:text="${user.username}">Имя пользователя</h2>
+    <h2 th:text="${user.fullName != null && !user.fullName.isEmpty() ? user.fullName : user.username}">Имя пользователя</h2>
+    <p>Логин: <span th:text="${user.username}">username</span></p>
     <p>Email: <span th:text="${user.email}">email@example.com</span></p>
-    <p>Роль
+  </div>
+</div>
+</body>
+</html>

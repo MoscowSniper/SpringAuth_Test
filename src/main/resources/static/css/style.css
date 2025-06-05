@@ -1,167 +1,302 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: white;
-    margin: 0;
-    display: flex;
-    height: auto;
+/* Базовые переменные для цветов и шрифтов */
+:root {
+    --primary-color: #4A90E2;
+    --primary-hover: #357ABD;
+    --background-color: #F5F7FA;
+    --sidebar-bg: #1F2937;
+    --sidebar-text: #E5E7EB;
+    --card-bg: #FFFFFF;
+    --text-color: #333333;
+    --border-radius: 12px;
+    --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    --font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Сброс и базовые стили */
+body {
+    margin: 0;
+    background-color: var(--background-color);
+    font-family: var(--font-family);
+    color: var(--text-color);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Сайдбар */
+.sidebar {
+    width: 220px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 30px 20px;
+    position: fixed;
+    height: 100%;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+.sidebar h2 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.sidebar ul li {
+    margin-bottom: 20px;
+}
+
+.sidebar ul li a {
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.sidebar ul li a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* Кнопка выхода */
+.sidebar form input[type="submit"] {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    font-weight: 600;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.sidebar form input[type="submit"]:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Основной контент */
+.main {
+    margin-left: 240px;
+    padding: 40px 30px;
+    width: calc(100% - 240px);
+    background-color: var(--card-bg);
+    min-height: 100vh;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+    overflow-y: auto;
+}
+
+/* Заголовки */
+h1 {
+    font-size: 2.4rem;
+    margin-bottom: 30px;
+    color: var(--primary-color);
+    font-weight: 700;
+    text-align: left;
+}
+
+/* Карточки пользователей и контактов */
+.contact-info, .user {
+    background-color: var(--card-bg);
+    padding: 25px 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.user:hover, .contact-info:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Заголовки в карточках */
+.user h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-weight: 700;
+    font-size: 1.6rem;
+}
+
+.user p, .contact-info p {
+    margin: 6px 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Ссылки */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
+
+/* Футер */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2C3E50;
+    color: #E0E0E0;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Формы */
 .container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    margin-left: 40%;
-    margin-top: 15%;
+    background-color: var(--card-bg);
+    padding: 30px 35px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    max-width: 400px;
+    margin: 10% auto 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 label {
+    font-weight: 600;
+    margin-bottom: 8px;
     display: block;
-    margin-bottom: 5px;
+    color: var(--text-color);
 }
 
-input[type="text"],
-input[type="password"] {
-    width: 93%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1.5px solid #ccc;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 button {
-    width: 100%;
-    padding: 10px;
-    background-color: #28a745;
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    padding: 14px 0;
+    font-size: 1.1rem;
+    border-radius: var(--border-radius);
+    font-weight: 700;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
 }
 
 button:hover {
-    background-color: #218838;
+    background-color: var(--primary-hover);
 }
 
 .register-link {
     text-align: center;
-    margin-top: 15px;
+    margin-top: 20px;
+    font-size: 0.95rem;
 }
 
 .register-link a {
-    color: #007bff;
-    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 600;
 }
 
 .register-link a:hover {
     text-decoration: underline;
 }
-body{
-    background-color: ghostwhite;
-}
-.main {
-    margin-left: 220px; /* Отступ для основного контента, чтобы не перекрывался меню */
-    flex-grow: 1; /* Позволяет основному контенту занимать оставшееся пространство */
-    background-color: white;
-    height: 100%;
-}
-.application {
-    background-color: beige;
-    padding: 5px;
 
-}
+/* Адаптивность */
 
-.sidebar {
-    width: 200px; /* Ширина бокового меню */
-    background-color: #007bff; /* Цвет фона */
-    color: black; /* Цвет текста */
-    padding: 15px; /* Отступы */
-    position: fixed; /* Фиксированное положение */
-    height: 100%; /* Высота на всю страницу */
-}
-
-.sidebar h2 {
-    margin: 0 0 15px 0; /* Отступы для заголовка */
-    padding-top: 10px;
-}
-
-.sidebar ul {
-    list-style-type: none; /* Убираем маркеры списка */
-    padding: 0; /* Убираем отступы */
-}
-
-.sidebar ul li {
-    margin: 150px 0; /* Отступы между пунктами меню */
-}
-
-.sidebar ul li a {
-    color: black; /* Цвет ссылок */
-    text-decoration: none; /* Убираем подчеркивание */
-}
-
-.sidebar ul li a:hover {
-    text-decoration: underline; /* Подчеркивание при наведении */
-}
-
-.main {
-    margin-left: 220px; /* Отступ для основного контента, чтобы не перекрывался меню */
-    height: 100%; /* Высота на всю страницу */
-
-}
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .sidebar {
-        width: 100px; /* Уменьшаем ширину бокового меню */
+        width: 180px;
+        padding: 25px 15px;
     }
 
     .main {
-        margin-left: 120px; /* Уменьшаем отступ для основного контента */
+        margin-left: 190px;
+        padding: 30px 20px;
+        width: calc(100% - 190px);
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .sidebar ul {
+        display: flex;
+        gap: 15px;
+        margin: 0;
+    }
+
+    .sidebar ul li {
+        margin: 0;
+    }
+
+    .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px 15px;
+    }
+
+    .container {
+        margin: 5% auto 0 auto;
+        width: 90%;
+        max-width: 400px;
+        padding: 25px 20px;
     }
 }
 
 @media (max-width: 480px) {
-    .sidebar {
-        display: none; /* Скрываем боковое меню на маленьких экранах */
+    .user, .contact-info {
+        padding: 18px 15px;
     }
 
-    .main {
-        margin-left: 0; /* Убираем отступ для основного контента */
-        padding: 10px; /* Уменьшаем отступы */
+    h1 {
+        font-size: 1.8rem;
     }
 }
-footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    background-color: #444;
-    width: 100%;
-}
-.footer_color{
-    color: #e45218;
-}
-
-.menu{
-    margin-left: 5px;
-    width: 20px; /* Задаем ширину изображения */
-    height: 20px; /* Высота будет автоматически подстраиваться */
-}
-
-.image_container{
-    margin-left: 30%;
-}
-.main_1 {
-    margin-left: 8.5%; /* Отступ для основного контента, чтобы не перекрывался меню */
-    height: 100%; /* Высота на всю страницу */
-    position: fixed; /* Фиксированное положение */
-
-}
-
-
