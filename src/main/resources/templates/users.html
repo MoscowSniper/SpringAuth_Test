@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Пользователи</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        h1 { margin-bottom: 20px; }
+        .user {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.05);
+            max-width: 600px;
+        }
+        .user h2 { margin: 0 0 10px; }
+        .user p { margin: 0; }
+        a { text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2><a th:href="@{/hello}">Главная</a></h2>
+    <ul>
+        <li><a th:href="@{/posts/create}">Создать пост</a></li>
+        <li><a th:href="@{/posts}">Посты</a></li>
+        <li><a th:href="@{/contact}">Пользователи</a></li>
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="submit" value="Sign Out"/>
+        </form>
+    </ul>
+</div>
+
+<div class="main">
+    <h1>Пользователи</h1>
+
+    <div th:if="${users.isEmpty()}">
+        <p style="margin-left: 45%">Пользователи отсутствуют.</p>
+    </div>
+
+    <div th:each="user : ${users}" class="user">
+        <h2 th:text="${user.username}">Имя пользователя</h2>
+        <p>Email: <span th:text="${user.email}">email@example.com</span></p>
+        <p>Роль: <span th:text="${user.role}">ROLE_USER</span></p>
+    </div>
+</div>
+</body>
+</html>

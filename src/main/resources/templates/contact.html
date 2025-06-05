@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Контакты и пользователи</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    h1 { margin-bottom: 20px; }
+    .contact-info {
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      max-width: 600px;
+      margin-bottom: 30px;
+    }
+    .user {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      max-width: 600px;
+    }
+    .user h2 { margin: 0 0 10px; }
+    .user p { margin: 0; }
+    a { text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <h2><a th:href="@{/hello}">Главная</a></h2>
+  <ul>
+    <li><a th:href="@{/posts/create}">Создать пост</a></li>
+    <li><a th:href="@{/posts}">Посты</a></li>
+    <li><a th:href="@{/contact}">Пользователи</a></li>
+    <form th:action="@{/logout}" method="post">
+      <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+      <input type="submit" value="Sign Out"/>
+    </form>
+  </ul>
+</div>
+
+<div class="main">
+  <h1>Контакты</h1>
+
+  <div class="contact-info">
+    <p><strong>Адрес:</strong> г. Москва, ул. Примерная, д. 1</p>
+    <p><strong>Телефон:</strong> +7 (495) 123-45-67</p>
+    <p><strong>Email:</strong> <a href="mailto:info@example.com">info@example.com</a></p>
+    <p><strong>Время работы:</strong> Пн-Пт, 9:00 - 18:00</p>
+  </div>
+
+  <h1>Пользователи</h1>
+
+  <div th:if="${users.isEmpty()}">
+    <p>Пользователи отсутствуют.</p>
+  </div>
+
+  <div th:each="user : ${users}" class="user">
+    <h2 th:text="${user.username}">Имя пользователя</h2>
+    <p>Email: <span th:text="${user.email}">email@example.com</span></p>
+    <p>Роль

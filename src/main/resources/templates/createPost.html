@@ -25,7 +25,7 @@
     </ul>
 </div>
 <div class="main">
-<<form th:action="@{/posts/create}" th:object="${post}" method="post">
+    <<form th:action="@{/posts/create}" th:object="${post}" method="post">
     <label for="title">Заголовок</label>
     <input type="text" id="title" name="title" th:field="*{title}" placeholder="Введите заголовок" required />
 

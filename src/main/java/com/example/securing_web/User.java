@@ -16,7 +16,21 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // Геттеры и сеттеры
+    // --- Новые поля ---
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "full_name")
+    private String fullName;
+
+    // --- Конструкторы (если нужно) ---
+
+    public User() {
+    }
+
+    // --- Геттеры и сеттеры ---
+
     public Long getId() {
         return id;
     }
@@ -35,5 +49,23 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    // --- Геттеры и сеттеры для новых полей ---
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }
