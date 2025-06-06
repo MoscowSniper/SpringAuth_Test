@@ -22,7 +22,7 @@
 </head>
 <body>
 <div class="sidebar">
-    <h2><a th:href="@{/hello}">Главная</a></h2>
+    <h2><a th:href="@{/hello}"style="color: white">Главная</a></h2>
     <ul>
         <li><a th:href="@{/posts/create}">Создать пост</a></li>
         <li><a th:href="@{/posts}">Посты</a></li>
@@ -43,7 +43,6 @@
 
     <div th:each="user : ${users}" class="user">
         <h2 th:text="${user.username}">Имя пользователя</h2>
-        <p>Email: <span th:text="${user.email}">email@example.com</span></p>
         <p>Роль: <span th:text="${user.role}">ROLE_USER</span></p>
     </div>
 </div>

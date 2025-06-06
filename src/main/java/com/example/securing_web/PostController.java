@@ -30,6 +30,7 @@ public class PostController {
     @Autowired
     private CommentService commentService;  // <-- добавил CommentService
 
+
     // Фильтр для поддержки PUT/DELETE методов через _method
     @Bean
     public HiddenHttpMethodFilter hiddenHttpMethodFilter() {

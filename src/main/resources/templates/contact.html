@@ -61,7 +61,6 @@
   <div class="contact-info">
     <p><strong>Адрес:</strong> г. Москва, ул. Примерная, д. 1</p>
     <p><strong>Телефон:</strong> +7 (495) 123-45-67</p>
-    <p><strong>Email:</strong> <a href="mailto:info@example.com">info@example.com</a></p>
     <p><strong>Время работы:</strong> Пн-Пт, 9:00 - 18:00</p>
   </div>
 
@@ -74,7 +73,6 @@
   <div th:each="user : ${users}" class="user">
     <h2 th:text="${user.fullName != null && !user.fullName.isEmpty() ? user.fullName : user.username}">Имя пользователя</h2>
     <p>Логин: <span th:text="${user.username}">username</span></p>
-    <p>Email: <span th:text="${user.email}">email@example.com</span></p>
   </div>
 </div>
 </body>

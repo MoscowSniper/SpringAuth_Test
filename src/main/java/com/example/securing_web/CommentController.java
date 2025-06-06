@@ -1,45 +1,37 @@
 package com.example.securing_web;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/api/comments")
 public class CommentController {
 
     private final CommentService commentService;
 
-    // Конструктор с @Autowired (не обязательно с последних версий Spring)
     public CommentController(CommentService commentService) {
         this.commentService = commentService;
     }
 
-    // Добавление комментария
+
     @PostMapping
-    public ResponseEntity<Comment> addComment(@RequestBody CommentDto commentDto) {
-        if (commentDto == null
-                || commentDto.getPostId() == null
-                || commentDto.getAuthor() == null
-                || commentDto.getAuthor().isEmpty()
-                || commentDto.getContent() == null
-                || commentDto.getContent().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+    public String addComment(@RequestParam Long postId,
+                             @RequestParam String author,
+                             @RequestParam String content) {
+        if (postId == null || author == null || author.isEmpty() || content == null || content.isEmpty()) {
+            // Можно добавить обработку ошибок, например, возврат страницы с сообщением
+            return "redirect:/posts?error=emptyfields";
         }
 
-        Comment savedComment = commentService.addComment(
-                commentDto.getPostId(),
-                commentDto.getAuthor(),
-                commentDto.getContent()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
+        commentService.addComment(postId, author, content);
+        return "redirect:/posts";
     }
 
-    // Получение комментариев по ID поста
     @GetMapping("/post/{postId}")
+    @ResponseBody
     public ResponseEntity<List<Comment>> getCommentsByPost(@PathVariable Long postId) {
         List<Comment> comments = commentService.getCommentsByPostId(postId);
         if (comments == null || comments.isEmpty()) {
@@ -48,3 +40,4 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 }
+

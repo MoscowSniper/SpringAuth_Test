@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,21 +15,19 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // --- Новые поля ---
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(name = "full_name")
-    private String fullName;
-
-    // --- Конструкторы (если нужно) ---
+    @Column(name = "full_name") // Добавлено поле fullName
+    private String fullName; // Новое поле для полного имени
 
     public User() {
     }
 
-    // --- Геттеры и сеттеры ---
+    public User(String username, String password, String fullName) { // Обновленный конструктор
+        this.username = username;
+        this.password = password;
+        this.fullName = fullName; // Инициализация полного имени
+    }
 
+    // Геттеры и сеттеры
     public Long getId() {
         return id;
     }
@@ -51,21 +48,11 @@ public class User {
         this.password = password;
     }
 
-    // --- Геттеры и сеттеры для новых полей ---
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getFullName() {
+    public String getFullName() { // Геттер для fullName
         return fullName;
     }
 
-    public void setFullName(String fullName) {
+    public void setFullName(String fullName) { // Сеттер для fullName
         this.fullName = fullName;
     }
 }
