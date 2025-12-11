@@ -1,7 +1,7 @@
-package com.example.securing_web;
+package com.example.securing_web.repository;
 
 
-import com.example.securing_web.User;
+import com.example.securing_web.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

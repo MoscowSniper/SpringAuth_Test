@@ -1,5 +1,6 @@
-package com.example.securing_web;
+package com.example.securing_web.repository;
 
+import com.example.securing_web.entity.PostVote;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

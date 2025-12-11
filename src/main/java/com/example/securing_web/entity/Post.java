@@ -1,6 +1,7 @@
-package com.example.securing_web;
+package com.example.securing_web.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +29,27 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    // ★ ДОБАВЛЕНА СВЯЗЬ С ГОЛОСАМИ ★
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostVote> votes = new ArrayList<>();
+
+    // ★ ★ ★ ДОБАВЛЕНО: поля даты создания и обновления ★ ★ ★
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    // ★ ★ ★ ДОБАВЛЕНО: Callback методы ★ ★ ★
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     public Post() {
     }
@@ -41,6 +60,8 @@ public class Post {
         this.author = author;
         this.likes = 0;
         this.dislikes = 0;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     // Геттеры и сеттеры
@@ -100,13 +121,29 @@ public class Post {
         this.comments = comments;
     }
 
-    // ★ ДОБАВЛЕНЫ ГЕТТЕРЫ И СЕТТЕРЫ ДЛЯ VOTES ★
     public List<PostVote> getVotes() {
         return votes;
     }
 
     public void setVotes(List<PostVote> votes) {
         this.votes = votes;
+    }
+
+    // ★ ★ ★ ДОБАВЛЕНО: геттеры для дат ★ ★ ★
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     // Методы для работы с комментариями
@@ -120,7 +157,7 @@ public class Post {
         comment.setPost(null);
     }
 
-    // ★ ДОБАВЛЕНЫ МЕТОДЫ ДЛЯ РАБОТЫ С ГОЛОСАМИ ★
+    // Методы для работы с голосами
     public void addVote(PostVote vote) {
         votes.add(vote);
         vote.setPost(this);
@@ -140,6 +177,8 @@ public class Post {
                 ", author='" + author + '\'' +
                 ", likes=" + likes +
                 ", dislikes=" + dislikes +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
                 ", commentsCount=" + (comments != null ? comments.size() : 0) +
                 ", votesCount=" + (votes != null ? votes.size() : 0) +
                 '}';

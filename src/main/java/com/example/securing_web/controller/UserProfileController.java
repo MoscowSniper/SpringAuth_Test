@@ -1,6 +1,6 @@
-package com.example.securing_web;
+package com.example.securing_web.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.securing_web.entity.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

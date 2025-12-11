@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Фрагмент карточки комментария -->
+<div th:fragment="comment-card(comment, currentUsername, commentService)">
+    <div class="comment-header">
+        <div class="comment-author">
+            <div class="author-avatar" th:text="${comment.author.substring(0, 1).toUpperCase()}">A</div>
+            <div>
+                <div class="author-name" th:text="${comment.author}">Автор</div>
+                <div class="comment-time" th:text="${commentService.formatDateTime(comment.createdAt)}">Время</div>
+            </div>
+        </div>
+
+        <div class="comment-actions">
+            <button class="reply-btn" th:onclick="'showReplyForm(' + ${comment.id} + ')'">
+                <i class="fas fa-reply"></i> Ответить
+            </button>
+        </div>
+    </div>
+
+    <div class="comment-content" th:text="${comment.content}">
+        Текст комментария...
+    </div>
+</div>
+</body>
+</html>

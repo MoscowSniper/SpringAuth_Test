@@ -1,7 +1,7 @@
-package com.example.securing_web;
+package com.example.securing_web.service;
 
-import com.example.securing_web.User;
-import com.example.securing_web.UserRepository;
+import com.example.securing_web.entity.User;
+import com.example.securing_web.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 

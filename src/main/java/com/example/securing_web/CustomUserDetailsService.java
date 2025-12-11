@@ -1,7 +1,7 @@
 package com.example.securing_web;
 
-import com.example.securing_web.User;
-import com.example.securing_web.UserRepository;
+import com.example.securing_web.entity.User;
+import com.example.securing_web.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

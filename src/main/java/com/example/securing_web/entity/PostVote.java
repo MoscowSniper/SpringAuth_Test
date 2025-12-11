@@ -1,5 +1,6 @@
-package com.example.securing_web;
+package com.example.securing_web.entity;
 
+import com.example.securing_web.VoteType;
 import jakarta.persistence.*;
 
 @Entity

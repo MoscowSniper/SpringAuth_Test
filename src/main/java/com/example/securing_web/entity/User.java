@@ -1,4 +1,4 @@
-package com.example.securing_web;
+package com.example.securing_web.entity;
 
 import jakarta.persistence.*;
 

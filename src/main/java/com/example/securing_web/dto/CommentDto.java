@@ -1,4 +1,4 @@
-package com.example.securing_web;
+package com.example.securing_web.dto;
 
 public class CommentDto {
     private Long postId;

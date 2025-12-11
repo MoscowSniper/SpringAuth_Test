@@ -1,5 +1,7 @@
-package com.example.securing_web;
+package com.example.securing_web.controller;
 
+import com.example.securing_web.entity.User;
+import com.example.securing_web.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

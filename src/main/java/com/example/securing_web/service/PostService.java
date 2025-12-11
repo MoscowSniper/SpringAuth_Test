@@ -1,5 +1,10 @@
-package com.example.securing_web;
+package com.example.securing_web.service;
 
+import com.example.securing_web.*;
+import com.example.securing_web.entity.Post;
+import com.example.securing_web.entity.PostVote;
+import com.example.securing_web.repository.PostRepository;
+import com.example.securing_web.repository.PostVoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

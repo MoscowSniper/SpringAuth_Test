@@ -3,37 +3,188 @@
 <head>
     <title>Создать пост</title>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        form { display: flex; flex-direction: column; margin-left: 5% }
-        label { margin-top: 15px; font-weight: bold; margin-left: 5% }
-        input[type="text"], textarea { padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; }
-        button { margin-top: 20px; padding: 10px; background-color: #007bff; color: white; font-weight: 600; border: none; cursor: pointer; border-radius: 5px; }
-        button:hover { background-color: #0056b3; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            color: var(--clr-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .cancel-btn {
+            padding: 0.75rem 2rem;
+            background: var(--clr-bg);
+            color: var(--clr-text-dark);
+            border: 2px solid var(--clr-border);
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cancel-btn:hover {
+            background: var(--clr-border);
+        }
     </style>
 </head>
 <body>
+
 <div class="sidebar">
-    <h2><a th:href="@{/hello}"style="color: white">Главная</a></h2>
-    <ul>
-        <li><a th:href="@{/posts/create}">Создать пост</a></li>
-        <li><a th:href="@{/posts}">Посты</a></li>
-        <li><a th:href="@{/contact}">Пользователи</a></li>
-        <form th:action="@{/logout}" method="post">
-            <input type="submit" value="Sign Out"/>
-        </form>
+    <div class="sidebar-header">
+        <h2><a href="/" style="color: white; text-decoration: none;">Форум</a></h2>
+        <div class="subtitle">Новый пост</div>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li><a th:href="@{/posts}"><i class="fas fa-arrow-left"></i> Назад к постам</a></li>
+        <li><a th:href="@{/posts}"><i class="fas fa-stream"></i> Все посты</a></li>
+        <li><a th:href="@{/contact}"><i class="fas fa-users"></i> Пользователи</a></li>
     </ul>
+
+    <div class="user-info" style="margin-top: auto; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: 1rem;">
+        <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+        <div style="font-size: 0.875rem;" th:text="${username}">Пользователь</div>
+    </div>
+
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </form>
 </div>
+
 <div class="main">
-    <<form th:action="@{/posts/create}" th:object="${post}" method="post">
-    <label for="title">Заголовок</label>
-    <input type="text" id="title" name="title" th:field="*{title}" placeholder="Введите заголовок" required />
+    <a th:href="@{/posts}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Назад к постам
+    </a>
 
-    <label for="content">Содержание</label>
-    <textarea id="content" name="content" th:field="*{content}" rows="6" placeholder="Введите содержание поста" required></textarea>
+    <div class="create-post-form">
+        <h1 style="margin-bottom: 2rem; color: var(--clr-primary-dark);">
+            <i class="fas fa-plus-circle"></i> Создать новый пост
+        </h1>
 
-    <button type="submit">Создать</button>
-</form>
+        <div th:if="${error != null}" class="alert alert-error" style="margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}">Ошибка</span>
+        </div>
+
+        <form th:action="@{/posts/create}" th:object="${post}" method="post">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div class="form-group">
+                <label for="title" class="form-label">
+                    <i class="fas fa-heading"></i> Заголовок поста
+                </label>
+                <input type="text" id="title" name="title" th:field="*{title}"
+                       class="form-input" placeholder="Введите заголовок (например: 'Как научиться программировать?')"
+                       required maxlength="255">
+                <div style="font-size: 0.875rem; color: var(--clr-text-light); margin-top: 0.5rem;">
+                    Будьте конкретны и ясны в формулировке
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="content" class="form-label">
+                    <i class="fas fa-align-left"></i> Содержание
+                </label>
+                <textarea id="content" name="content" th:field="*{content}"
+                          class="form-input" rows="8"
+                          placeholder="Подробно опишите вашу тему. Можно использовать Markdown-разметку..."
+                          required maxlength="5000"></textarea>
+                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                    <div style="font-size: 0.875rem; color: var(--clr-text-light);">
+                        Максимум 5000 символов
+                    </div>
+                    <div class="char-counter">
+                        Осталось символов: <span id="charCount">5000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-user"></i> Автор
+                </label>
+                <div style="padding: 0.75rem 1rem; background: var(--clr-bg); border-radius: var(--radius); color: var(--clr-text-dark);">
+                    <strong th:text="${username}">Имя пользователя</strong>
+                </div>
+                <div style="font-size: 0.875rem; color: var(--clr-text-light); margin-top: 0.5rem;">
+                    Пост будет опубликован от вашего имени
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/posts}" class="cancel-btn">
+                    <i class="fas fa-times"></i> Отмена
+                </a>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Опубликовать пост
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
+
+<script>
+    // Счетчик символов
+    document.addEventListener('DOMContentLoaded', function() {
+        const contentTextarea = document.getElementById('content');
+        const charCount = document.getElementById('charCount');
+
+        if (contentTextarea && charCount) {
+            function updateCharCount() {
+                const maxLength = 5000;
+                const currentLength = contentTextarea.value.length;
+                const remaining = maxLength - currentLength;
+
+                charCount.textContent = remaining;
+
+                if (remaining < 100) {
+                    charCount.style.color = '#ef4444';
+                } else if (remaining < 500) {
+                    charCount.style.color = '#f59e0b';
+                } else {
+                    charCount.style.color = '';
+                }
+            }
+
+            contentTextarea.addEventListener('input', updateCharCount);
+            updateCharCount(); // Инициализация
+        }
+
+        // Подсказка при фокусе
+        const titleInput = document.getElementById('title');
+        if (titleInput) {
+            titleInput.addEventListener('focus', function() {
+                this.style.borderColor = 'var(--clr-primary)';
+            });
+
+            titleInput.addEventListener('blur', function() {
+                if (!this.value.trim()) {
+                    this.style.borderColor = 'var(--clr-danger)';
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
