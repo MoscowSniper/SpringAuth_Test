@@ -36,6 +36,11 @@ public class Post {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    // Добавляем связь с категорией
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
@@ -54,10 +59,11 @@ public class Post {
     public Post() {
     }
 
-    public Post(String title, String content, String author) {
+    public Post(String title, String content, String author, Category category) {
         this.title = title;
         this.content = content;
         this.author = author;
+        this.category = category;
         this.likes = 0;
         this.dislikes = 0;
         this.createdAt = LocalDateTime.now();
@@ -92,7 +98,9 @@ public class Post {
     public String getAuthor() {
         return author;
     }
-
+    // Геттер и сеттер для категории
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
     public void setAuthor(String author) {
         this.author = author;
     }

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Главная - Форум</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2><a href="/static" style="color: white; text-decoration: none;">Форум</a></h2>
+        <div class="subtitle">Главная</div>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li><a th:href="@{/categories}"><i class="fas fa-layer-group"></i> Разделы</a></li>
+        <li><a th:href="@{/posts}"><i class="fas fa-stream"></i> Все посты</a></li>
+        <li><a th:href="@{/posts/create}"><i class="fas fa-plus-circle"></i> Создать пост</a></li>
+        <li><a th:href="@{/contact}"><i class="fas fa-users"></i> Пользователи</a></li>
+    </ul>
+
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </form>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <h1><i class="fas fa-home"></i> Добро пожаловать на форум!</h1>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+        <div class="post-card" style="text-align: center;">
+            <div style="font-size: 4rem; color: var(--clr-primary); margin-bottom: 1rem;">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <h2 style="margin-bottom: 1rem;">Разделы</h2>
+            <p style="color: var(--clr-text-light); margin-bottom: 1.5rem;">
+                Обсуждайте темы в соответствующих разделах
+            </p>
+            <a th:href="@{/categories}" class="submit-btn" style="display: inline-block;">
+                <i class="fas fa-arrow-right"></i> Перейти к разделам
+            </a>
+        </div>
+
+        <div class="post-card" style="text-align: center;">
+            <div style="font-size: 4rem; color: var(--clr-success); margin-bottom: 1rem;">
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <h2 style="margin-bottom: 1rem;">Создать пост</h2>
+            <p style="color: var(--clr-text-light); margin-bottom: 1.5rem;">
+                Начните новое обсуждение
+            </p>
+            <a th:href="@{/posts/create}" class="submit-btn" style="display: inline-block;">
+                <i class="fas fa-arrow-right"></i> Создать пост
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

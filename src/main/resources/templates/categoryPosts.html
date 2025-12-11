@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${category.name} + ' - Форум'">Категория</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .category-banner {
+            background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-dark));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translate(50px, -50px);
+        }
+
+        .banner-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .category-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-description {
+            opacity: 0.9;
+            font-size: 1.1rem;
+            max-width: 600px;
+        }
+
+        .new-post-btn {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            color: var(--clr-primary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .new-post-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .post-summary {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--clr-border);
+            transition: background 0.2s ease;
+        }
+
+        .post-summary:hover {
+            background: var(--clr-bg);
+        }
+
+        .post-info {
+            flex: 1;
+        }
+
+        .post-summary-title {
+            font-weight: 600;
+            color: var(--clr-text-dark);
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+
+        .post-summary-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--clr-text-light);
+            font-size: 0.875rem;
+        }
+
+        .post-stats-small {
+            display: flex;
+            gap: 1rem;
+            color: var(--clr-text-light);
+            font-size: 0.875rem;
+        }
+
+        .stat-item-small {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2><a href="/static" style="color: white; text-decoration: none;">Форум</a></h2>
+        <div class="subtitle" th:text="${category.name}">Раздел</div>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li><a th:href="@{/categories}"><i class="fas fa-arrow-left"></i> Все разделы</a></li>
+        <li><a th:href="@{'/posts/create?categoryId=' + ${category.id}}"><i class="fas fa-plus-circle"></i> Создать пост</a></li>
+        <li><a th:href="@{/posts}"><i class="fas fa-stream"></i> Все посты</a></li>
+        <li><a th:href="@{/contact}"><i class="fas fa-users"></i> Пользователи</a></li>
+    </ul>
+
+    <div class="user-info" style="margin-top: auto; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: 1rem;">
+        <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+        <div style="font-size: 0.875rem;" th:text="${currentUsername}">Пользователь</div>
+    </div>
+
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </form>
+</div>
+
+<div class="main">
+    <!-- Баннер категории -->
+    <div class="category-banner">
+        <div class="banner-content">
+            <h1 class="category-title" th:text="${category.name}">Название раздела</h1>
+            <p class="category-description" th:text="${category.description != null ? category.description : 'Описание раздела отсутствует'}">
+                Описание раздела...
+            </p>
+            <a th:href="@{'/posts/create?categoryId=' + ${category.id}}" class="new-post-btn">
+                <i class="fas fa-plus"></i> Новый пост
+            </a>
+        </div>
+    </div>
+
+    <!-- Сообщения -->
+    <div th:if="${param.success != null}" class="alert alert-success">
+        <span th:if="${param.success == 'post_created'}"><i class="fas fa-check-circle"></i> Пост успешно создан!</span>
+        <span th:if="${param.success == 'post_deleted'}"><i class="fas fa-check-circle"></i> Пост успешно удален!</span>
+    </div>
+
+    <!-- Пустое состояние -->
+    <div th:if="${posts == null or posts.isEmpty()}" class="empty-state">
+        <i class="fas fa-comment-slash"></i>
+        <h3>В этом разделе пока нет постов</h3>
+        <p>Будьте первым, кто создаст обсуждение в этом разделе!</p>
+        <a th:href="@{'/posts/create?categoryId=' + ${category.id}}" class="submit-btn" style="display: inline-block;">
+            <i class="fas fa-plus"></i> Создать первый пост
+        </a>
+    </div>
+
+    <!-- Список постов -->
+    <div class="post-card" th:each="post : ${posts}" th:id="'post-' + ${post.id}">
+        <!-- Заголовок и метаданные -->
+        <div class="post-header">
+            <div style="flex: 1;">
+                <h2 class="post-title">
+                    <a th:href="@{'/posts/' + ${post.id} + '/view'}" style="color: inherit; text-decoration: none;">
+                        <span th:text="${post.title}">Заголовок поста</span>
+                    </a>
+                </h2>
+                <div class="post-meta">
+                    <span class="post-author" th:text="${post.author}">Автор</span>
+                    <span>•</span>
+                    <span th:text="${commentService.formatPostDateTime(post.createdAt)}">Дата</span>
+                </div>
+            </div>
+
+            <!-- Кнопка удаления (только для автора) -->
+            <div th:if="${post.author == currentUsername}" class="ml-3">
+                <form th:action="@{'/posts/delete/' + ${post.id}}" method="post"
+                      onsubmit="return confirm('Вы уверены, что хотите удалить этот пост? Все комментарии также будут удалены.');">
+                    <input type="hidden" name="_method" value="delete"/>
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="action-btn delete-btn">
+                        <i class="fas fa-trash"></i> Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Краткое содержание (первые 300 символов) -->
+        <div class="post-content" th:text="${#strings.abbreviate(post.content, 300)}">
+            Содержание поста...
+        </div>
+
+        <!-- Статистика -->
+        <div class="post-stats">
+            <div class="stat-item">
+                <i class="fas fa-comment"></i>
+                <span th:text="${post.comments != null ? post.comments.size() : 0}">0</span> комментариев
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-thumbs-up"></i>
+                <span th:text="${post.likes}">0</span> лайков
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-thumbs-down"></i>
+                <span th:text="${post.dislikes}">0</span> дизлайков
+            </div>
+            <div style="flex: 1;"></div>
+            <a th:href="@{'/posts/' + ${post.id} + '/view'}" class="submit-btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                <i class="fas fa-external-link-alt"></i> Читать далее
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
