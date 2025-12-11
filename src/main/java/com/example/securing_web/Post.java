@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "post")
 public class Post {
 
     @Id
@@ -24,9 +25,12 @@ public class Post {
     @Column(nullable = false)
     private int dislikes = 0;
 
-    // Правильно объявленное единственное поле комментариев
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    // ★ ДОБАВЛЕНА СВЯЗЬ С ГОЛОСАМИ ★
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostVote> votes = new ArrayList<>();
 
     public Post() {
     }
@@ -96,6 +100,15 @@ public class Post {
         this.comments = comments;
     }
 
+    // ★ ДОБАВЛЕНЫ ГЕТТЕРЫ И СЕТТЕРЫ ДЛЯ VOTES ★
+    public List<PostVote> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(List<PostVote> votes) {
+        this.votes = votes;
+    }
+
     // Методы для работы с комментариями
     public void addComment(Comment comment) {
         comments.add(comment);
@@ -105,6 +118,17 @@ public class Post {
     public void removeComment(Comment comment) {
         comments.remove(comment);
         comment.setPost(null);
+    }
+
+    // ★ ДОБАВЛЕНЫ МЕТОДЫ ДЛЯ РАБОТЫ С ГОЛОСАМИ ★
+    public void addVote(PostVote vote) {
+        votes.add(vote);
+        vote.setPost(this);
+    }
+
+    public void removeVote(PostVote vote) {
+        votes.remove(vote);
+        vote.setPost(null);
     }
 
     @Override
@@ -117,6 +141,7 @@ public class Post {
                 ", likes=" + likes +
                 ", dislikes=" + dislikes +
                 ", commentsCount=" + (comments != null ? comments.size() : 0) +
+                ", votesCount=" + (votes != null ? votes.size() : 0) +
                 '}';
     }
 }

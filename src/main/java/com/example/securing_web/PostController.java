@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional; // ★ ДОБАВЛЕНО ★
 
 import java.util.List;
 
@@ -28,8 +29,11 @@ public class PostController {
     private PostService postService;
 
     @Autowired
-    private CommentService commentService;  // <-- добавил CommentService
+    private CommentService commentService;
 
+    // ★ ДОБАВЛЕНО ★
+    @Autowired
+    private PostVoteRepository postVoteRepository;
 
     // Фильтр для поддержки PUT/DELETE методов через _method
     @Bean
@@ -63,10 +67,27 @@ public class PostController {
         return "postList";
     }
 
-    // Удаление поста (работает с _method="delete")
+    // ★ ИСПРАВЛЕННЫЙ МЕТОД УДАЛЕНИЯ ★
     @DeleteMapping("/delete/{id}")
+    @Transactional // ★ ВАЖНО: Добавлена транзакция ★
     public String deletePost(@PathVariable Long id) {
-        postRepository.deleteById(id);
+        try {
+            // Вариант 1: Используем каскадное удаление через сущность
+            Post post = postRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+            // ★ Теперь Hibernate сам удалит связанные голоса и комментарии ★
+            postRepository.delete(post);
+
+            // Если все еще будет ошибка, используйте этот код:
+            // Вариант 2: Сначала удаляем голоса вручную
+            // postVoteRepository.deleteByPostId(id);
+            // postRepository.deleteById(id);
+
+        } catch (Exception e) {
+            System.err.println("Error deleting post: " + e.getMessage());
+            // Можно добавить логику обработки ошибок
+        }
         return "redirect:/posts";
     }
 
@@ -90,9 +111,6 @@ public class PostController {
         postService.dislikePost(id, userDetails.getUsername());
         return "redirect:/posts";
     }
-
-    // Удалил дублирующий метод getAllPosts (/posts/posts)
-    // Теперь метод viewPosts обрабатывает /posts
 
     // Добавление комментария к посту
     @PostMapping("/{id}/comments")
