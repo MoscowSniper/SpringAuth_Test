@@ -5,39 +5,163 @@
   <meta charset="UTF-8" />
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <style>
+    /* Твои стили без изменений */
     h1 { margin-bottom: 20px; }
-    .post { background: white; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 0 8px rgba(0,0,0,0.05); }
+    .post {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    }
     .post h2 { margin: 0 0 10px; }
-    .post p { white-space: pre-wrap;}
-    a {text-decoration: none;}
+    .post p { white-space: pre-wrap; }
+    a { text-decoration: none; }
     a:hover { text-decoration: underline; }
+    .like-dislike-buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    .like-dislike-buttons button {
+      background-color: #f0f0f0;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .like-dislike-buttons button:hover {
+      background-color: #e0e0e0;
+    }
+    .comments-section {
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
+    }
+    .comments-section h3 {
+      margin-bottom: 10px;
+    }
+    .comment {
+      border-top: 1px solid #eee;
+      padding: 8px 0;
+    }
+    .comment:first-child {
+      border-top: none;
+    }
+    .comment strong {
+      font-weight: 600;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+      resize: vertical;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    input[type="text"] {
+      margin-top: 5px;
+      width: 200px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .comment-form button {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border: none;
+      background-color: #1976d2;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .comment-form button:hover {
+      background-color: #115293;
+    }
   </style>
 </head>
 <body>
+
 <div class="sidebar">
-  <h2><a th:href="@{/hello}">Главная</a></h2>
+  <h2><a th:href="@{/hello}"style="color: white">Главная</a></h2>
   <ul>
-    <li><a th:href="@{/posts/create}">Создать пост</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
-    <li><a th:href="@{/posts}">Посты</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
-    <li><a th:href="@{/contact}">Пользователи</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+    <li><a th:href="@{/posts/create}">Создать пост</a></li>
+    <li><a th:href="@{/posts}">Посты</a></li>
+    <li><a th:href="@{/contact}">Пользователи</a></li>
     <form th:action="@{/logout}" method="post">
+      <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
       <input type="submit" value="Sign Out"/>
     </form>
   </ul>
 </div>
+
 <div class="main">
-<h1>Посты</h1>
-<a href="/posts/create" style="margin-left: 45%">Создать новый пост</a>
-<div th:if="${posts.isEmpty()}">
-  <p style="margin-left: 45%">Посты отсутствуют.</p>
-</div>
-<div th:each="post : ${posts}" class="post">
-  <h2 th:text="${post.title}">Заголовок</h2>
-  <p th:text="${post.content}">Содержание</p>
-  <form th:action="@{'/posts/delete/' + ${post.id}}" method="post" class="delete-form">
-    <button type="submit" class="delete-button" onclick="return confirm('Вы уверены, что хотите удалить этот пост?');">Удалить</button>
+  <h1>Посты</h1>
+
+  <form action="/posts/search" method="get">
+    <input type="text" name="query" placeholder="Поиск по постам" required>
+    <button type="submit">Поиск</button>
   </form>
-</div>
+
+  <a href="/posts/create" style="margin-left: 45%">Создать новый пост</a>
+
+  <div th:if="${posts.isEmpty()}">
+    <p style="margin-left: 45%">Посты отсутствуют.</p>
+  </div>
+
+  <div th:each="post : ${posts}" class="post">
+    <h2 th:text="${post.title}">Заголовок</h2>
+    <p th:text="${post.content}">Содержание</p>
+    <p>Автор: <span th:text="${post.author}">Автор</span></p>
+
+    <div class="comments-section">
+      <h3>Комментарии</h3>
+
+      <div th:if="${post.comments != null and !post.comments.isEmpty()}">
+        <div th:each="comment : ${post.comments}" class="comment">
+          <p><strong th:text="${comment.author}">Автор</strong> написал(а):</p>
+          <p th:text="${comment.content != null ? comment.content : comment.text}">Текст комментария</p>
+        </div>
+      </div>
+
+      <div th:if="${post.comments == null or post.comments.isEmpty()}">
+        <p>Комментариев пока нет.</p>
+      </div>
+
+      <form th:action="@{/api/comments}" method="post" class="comment-form">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="postId" th:value="${post.id}" />
+        <textarea name="content" placeholder="Оставьте комментарий" required></textarea>
+        <br/>
+        <input type="text" name="author" placeholder="Ваше имя" required>
+        <br/>
+        <button type="submit">Отправить комментарий</button>
+      </form>
+    </div>
+
+    <form th:action="@{'/posts/delete/' + ${post.id}}" method="post" class="delete-form">
+      <input type="hidden" name="_method" value="delete"/>
+      <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+      <button type="submit" class="delete-button"
+              onclick="return confirm('Вы уверены, что хотите удалить этот пост?');">Удалить</button>
+    </form>
+
+    <div class="like-dislike-buttons">
+      <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">👍 Like (<span th:text="${post.likes}">0</span>)</button>
+      </form>
+
+      <form th:action="@{/posts/{id}/dislike(id=${post.id})}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">👎 Dislike (<span th:text="${post.dislikes}">0</span>)</button>
+      </form>
+    </div>
+  </div>
 </div>
 </body>
 </html>

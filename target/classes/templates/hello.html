@@ -9,11 +9,11 @@
 <body>
 
 <div class="sidebar">
-    <h2><a th:href="@{/hello}">Главная</a></h2>
+    <h2><a th:href="@{/hello}"style="color: white">Главная</a></h2>
     <ul>
-        <li><a th:href="@{/posts/create}">Создать пост</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
-        <li><a th:href="@{/posts}">Посты</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
-        <li><a th:href="@{/contact}">Пользователи</a><img src="../../project-servlet-master/src/main/webapp/menu.png" class="menu"></li>
+        <li><a th:href="@{/posts/create}">Создать пост</a></li>
+        <li><a th:href="@{/posts}">Посты</a></li>
+        <li><a th:href="@{/contact}">Пользователи</a></li>
         <form th:action="@{/logout}" method="post">
             <input type="submit" value="Sign Out"/>
         </form>

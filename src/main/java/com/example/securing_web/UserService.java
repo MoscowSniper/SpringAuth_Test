@@ -1,10 +1,11 @@
 package com.example.securing_web;
 
-
 import com.example.securing_web.User;
 import com.example.securing_web.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -26,5 +27,10 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         return true;
+    }
+
+    // Добавляем метод для получения всех пользователей
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
     }
 }
