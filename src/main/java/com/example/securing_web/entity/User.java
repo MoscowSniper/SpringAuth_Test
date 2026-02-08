@@ -28,6 +28,14 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_groups",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
+    private Set<StudentGroup> groups = new HashSet<>();
+
     public User() {
     }
 
@@ -38,51 +46,40 @@ public class User {
     }
 
     // Геттеры и сеттеры
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public String getPassword() {
-        return password;
-    }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public Set<Role> getRoles() { return roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
+    public Set<StudentGroup> getGroups() { return groups; }
+    public void setGroups(Set<StudentGroup> groups) { this.groups = groups; }
 
     // Вспомогательные методы
     public void addRole(Role role) {
         this.roles.add(role);
-        role.getUsers().add(this);
     }
 
     public void removeRole(Role role) {
         this.roles.remove(role);
-        role.getUsers().remove(this);
+    }
+
+    public void addGroup(StudentGroup group) {
+        this.groups.add(group);
+        group.getStudents().add(this);
+    }
+
+    public void removeGroup(StudentGroup group) {
+        this.groups.remove(group);
+        group.getStudents().remove(this);
     }
 
     public boolean hasRole(String roleName) {
@@ -108,6 +105,16 @@ public class User {
         return fullName != null && !fullName.trim().isEmpty() ? fullName : username;
     }
 
+    public String getGroupNames() {
+        if (groups == null || groups.isEmpty()) {
+            return "Нет группы";
+        }
+        return groups.stream()
+                .map(StudentGroup::getName)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("Нет группы");
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -129,6 +136,7 @@ public class User {
                 ", username='" + username + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", rolesCount=" + (roles != null ? roles.size() : 0) +
+                ", groupsCount=" + (groups != null ? groups.size() : 0) +
                 '}';
     }
 }

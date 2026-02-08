@@ -21,6 +21,8 @@
         <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Посты</a></li>
         <li sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt"></i> Админ-панель</a>
+            <a th:href="@{/admin/groups}"><i class="fas fa-users"></i> Управление группами</a>
+        </li>
         </li>
     </ul>
 

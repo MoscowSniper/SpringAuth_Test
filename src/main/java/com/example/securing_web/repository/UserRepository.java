@@ -16,8 +16,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT DISTINCT u FROM User u JOIN FETCH u.roles WHERE u.username = :username")
     Optional<User> findByUsernameWithRoles(@Param("username") String username);
 
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.groups WHERE u.username = :username")
+    Optional<User> findByUsernameWithGroups(@Param("username") String username);
+
     List<User> findByRoles_Name(String roleName);
 
     @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.name = :roleName")
     long countByRoleName(@Param("roleName") String roleName);
+
+    // Методы для работы с группами
+    @Query("SELECT u FROM User u JOIN u.groups g WHERE g.id = :groupId")
+    List<User> findByGroupId(@Param("groupId") Long groupId);
+
+    // ★ ИСПРАВЛЕНО: Метод для поиска студентов без группы ★
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = 'ROLE_STUDENT' AND SIZE(u.groups) = 0")
+    List<User> findStudentsWithoutGroup();
 }

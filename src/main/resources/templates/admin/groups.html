@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <title>Управление группами</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .group-card {
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--clr-border);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--clr-text-light);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .badge {
+      background: var(--clr-primary);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .student-card {
+      background: white;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 280px;
+      transition: all 0.2s ease;
+    }
+
+    .student-card:hover {
+      border-color: var(--clr-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .student-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--clr-primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+
+    .student-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .student-name {
+      font-weight: 500;
+      color: var(--clr-text-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .student-username {
+      font-size: 0.75rem;
+      color: var(--clr-text-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .student-actions {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="/" style="color: white; text-decoration: none;">Форум</a></h2>
+    <div class="subtitle">Управление группами</div>
+  </div>
+
+  <ul class="sidebar-nav">
+    <li><a th:href="@{/hello}"><i class="fas fa-home"></i> Главная</a></li>
+    <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Посты</a></li>
+    <li sec:authorize="hasRole('ADMIN')">
+      <a th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt"></i> Панель управления</a>
+    </li>
+    <li sec:authorize="hasRole('ADMIN')">
+      <a th:href="@{/users/create}"><i class="fas fa-user-plus"></i> Создать пользователя</a>
+    </li>
+    <li sec:authorize="hasRole('ADMIN')">
+      <a th:href="@{/admin/groups}" class="active"><i class="fas fa-users"></i> Управление группами</a>
+    </li>
+  </ul>
+
+  <div class="user-info" sec:authorize="isAuthenticated()">
+    <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+    <div style="font-size: 0.875rem;" sec:authentication="name"></div>
+  </div>
+
+  <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()">
+    <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+    <button type="submit" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Выйти
+    </button>
+  </form>
+</div>
+
+<div class="main">
+  <!-- Заголовок -->
+  <div class="page-header">
+    <h1><i class="fas fa-users"></i> Управление группами студентов</h1>
+    <div class="subtitle">Создавайте группы, назначайте кураторов, распределяйте студентов</div>
+  </div>
+
+  <!-- Уведомления -->
+  <div th:if="${success}" class="alert alert-success">
+    <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+  </div>
+
+  <div th:if="${error}" class="alert alert-error">
+    <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+  </div>
+
+  <!-- Статистика -->
+  <div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-number" th:text="${totalGroups}">0</div>
+      <div class="stat-label">Всего групп</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🎓</div>
+      <div class="stat-number" th:text="${totalStudentsInGroups}">0</div>
+      <div class="stat-label">Студентов в группах</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-number" th:text="${studentsWithoutGroup != null ? studentsWithoutGroup.size() : 0}">0</div>
+      <div class="stat-label">Студентов без группы</div>
+    </div>
+  </div>
+
+  <!-- Форма создания новой группы -->
+  <div class="card">
+    <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-plus-circle"></i> Создать новую группу</h2>
+
+    <form th:action="@{/admin/groups/create}" method="post">
+      <!-- Исправленный CSRF токен -->
+      <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+
+      <div class="form-group">
+        <label for="groupName" class="form-label">Название группы *</label>
+        <input type="text" id="groupName" name="name" class="form-input"
+               placeholder="Например: ИВТ-101" required maxlength="50">
+      </div>
+
+      <div class="form-group">
+        <label for="groupDescription" class="form-label">Описание</label>
+        <textarea id="groupDescription" name="description" class="form-input"
+                  placeholder="Описание группы, специальность и т.д."
+                  rows="3" maxlength="1000"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="teacherSelect" class="form-label">Куратор (преподаватель)</label>
+        <select id="teacherSelect" name="teacherId" class="form-input">
+          <option value="">Без куратора</option>
+          <option th:each="teacher : ${teachers}"
+                  th:value="${teacher.id}"
+                  th:text="${teacher.fullName != null ? teacher.fullName : teacher.username}">
+          </option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-save"></i> Создать группу
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Список существующих групп -->
+  <div class="card">
+    <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-list"></i> Существующие группы</h2>
+
+    <!-- Пустое состояние -->
+    <div th:if="${groups == null or groups.isEmpty()}" class="empty-state">
+      <i class="fas fa-users-slash"></i>
+      <h3>Группы не созданы</h3>
+      <p>Создайте первую группу, используя форму выше</p>
+    </div>
+
+    <!-- Список групп -->
+    <div th:if="${groups != null and not groups.isEmpty()}">
+      <div th:each="group : ${groups}" th:id="'group-' + ${group.id}" class="group-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <div>
+            <h3 style="margin: 0; color: var(--clr-primary);" th:text="${group.name}">Название группы</h3>
+            <div style="color: var(--clr-text-light); margin-top: 0.5rem;"
+                 th:text="${group.description} ?: 'Нет описания'"></div>
+
+            <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+              <span th:if="${group.teacher != null}">
+                <i class="fas fa-chalkboard-teacher"></i> Куратор: 
+                <span th:text="${group.teacher.fullName != null ? group.teacher.fullName : group.teacher.username}"></span>
+              </span>
+              <span th:unless="${group.teacher != null}" style="color: var(--clr-text-light);">
+                <i class="fas fa-chalkboard-teacher"></i> Куратор не назначен
+              </span>
+            </div>
+
+            <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+              <i class="fas fa-user-graduate"></i> Студентов:
+              <span class="badge" th:text="${group.getStudentsCount()}">0</span>
+            </div>
+          </div>
+
+          <!-- Кнопки действий -->
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a th:href="@{/admin/groups/{id}/students(id=${group.id})}" class="action-btn">
+              <i class="fas fa-eye"></i> Просмотр
+            </a>
+            <button type="button" class="action-btn" th:onclick="'showEditForm(' + ${group.id} + ')'">
+              <i class="fas fa-edit"></i> Изменить
+            </button>
+            <form th:action="@{/admin/groups/{id}/delete(id=${group.id})}" method="post"
+                  onsubmit="return confirm('Удалить группу? Все студенты будут удалены из группы.');">
+              <!-- Исправленный CSRF токен -->
+              <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+              <button type="submit" class="action-btn delete-btn">
+                <i class="fas fa-trash"></i> Удалить
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Форма редактирования группы (скрыта) -->
+        <div th:id="'edit-form-' + ${group.id}" style="display: none; background: var(--clr-bg); padding: 1.5rem; border-radius: var(--radius); margin-top: 1rem;">
+          <h4 style="margin-bottom: 1rem;">Редактировать группу</h4>
+          <form th:action="@{/admin/groups/{id}/update(id=${group.id})}" method="post">
+            <!-- Исправленный CSRF токен -->
+            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label class="form-label">Название</label>
+                <input type="text" name="name" th:value="${group.name}" class="form-input" required>
+              </div>
+              <div>
+                <label class="form-label">Куратор</label>
+                <select name="teacherId" class="form-input">
+                  <option value="">Без куратора</option>
+                  <option th:each="teacher : ${teachers}"
+                          th:value="${teacher.id}"
+                          th:selected="${group.teacher != null and group.teacher.id == teacher.id}"
+                          th:text="${teacher.fullName != null ? teacher.fullName : teacher.username}">
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <label class="form-label">Описание</label>
+              <textarea name="description" class="form-input" rows="2"
+                        th:text="${group.description}"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Сохранить
+              </button>
+              <button type="button" class="action-btn" th:onclick="'hideEditForm(' + ${group.id} + ')'">
+                <i class="fas fa-times"></i> Отмена
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Добавление студента в группу -->
+        <div style="margin-top: 1rem;">
+          <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">Добавить студента в группу</h4>
+          <form th:action="@{/admin/groups/{groupId}/add-student(groupId=${group.id})}" method="post"
+                style="display: flex; gap: 0.5rem; align-items: flex-end;">
+            <!-- Исправленный CSRF токен -->
+            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+
+            <div style="flex: 1;">
+              <select name="studentId" class="form-input" required>
+                <option value="">Выберите студента...</option>
+                <option th:each="student : ${studentsWithoutGroup}"
+                        th:value="${student.id}"
+                        th:text="${student.fullName != null ? student.fullName + ' (' + student.username + ')' : student.username}">
+                </option>
+              </select>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              <i class="fas fa-user-plus"></i> Добавить
+            </button>
+          </form>
+        </div>
+
+        <!-- Список студентов группы -->
+        <div th:if="${group.getStudentsCount() > 0}" style="margin-top: 1.5rem;">
+          <h4 style="margin-bottom: 1rem; font-size: 1rem;">
+            <i class="fas fa-user-graduate"></i> Студенты в группе
+            <span class="badge" style="margin-left: 0.5rem;" th:text="${group.getStudentsCount()}">0</span>
+          </h4>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.75rem;">
+            <div th:each="student : ${group.students}" class="student-card">
+              <div class="student-avatar" th:text="${student.username.substring(0, 1).toUpperCase()}">
+                A
+              </div>
+
+              <div class="student-info">
+                <div class="student-name"
+                     th:text="${student.fullName != null and not student.fullName.isEmpty() ? 
+                               student.fullName : student.username}">
+                  Имя студента
+                </div>
+                <div class="student-username" th:text="'@' + ${student.username}">
+                  @username
+                </div>
+              </div>
+
+              <div class="student-actions">
+                <form th:action="@{/admin/groups/{groupId}/remove-student/{studentId}(groupId=${group.id}, studentId=${student.id})}"
+                      method="post"
+                      onsubmit="return confirm('Удалить студента из группы?');"
+                      style="display: inline;">
+                  <!-- Исправленный CSRF токен -->
+                  <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+                  <button type="submit" style="background: none; border: none; color: var(--clr-danger); cursor: pointer; padding: 0.25rem;"
+                          title="Удалить из группы">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Функции для показа/скрытия форм редактирования
+  function showEditForm(groupId) {
+    const form = document.getElementById('edit-form-' + groupId);
+    if (form) {
+      form.style.display = 'block';
+      form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function hideEditForm(groupId) {
+    const form = document.getElementById('edit-form-' + groupId);
+    if (form) {
+      form.style.display = 'none';
+    }
+  }
+
+  // Автоматическое скрытие уведомлений
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      alert.style.opacity = '0';
+      alert.style.transition = 'opacity 0.5s';
+      setTimeout(() => alert.remove(), 500);
+    });
+  }, 5000);
+
+  // Прокрутка к группе после действий
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#group-')) {
+    setTimeout(() => {
+      const groupElement = document.querySelector(hash);
+      if (groupElement) {
+        groupElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        groupElement.style.animation = 'pulse 2s';
+      }
+    }, 300);
+  }
+
+  // Анимация пульсации
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
