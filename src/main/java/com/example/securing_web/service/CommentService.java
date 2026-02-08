@@ -92,20 +92,33 @@ public class CommentService {
 
     public List<Comment> getCommentTreeByPostId(Long postId) {
         if (postId == null) {
+            System.out.println("ERROR: Post ID is null");
             return new ArrayList<>();
         }
 
-        // Получаем корневые комментарии
+        System.out.println("DEBUG: Loading comment tree for post " + postId);
+
+        // 1. Получаем корневые комментарии (без родителей)
         List<Comment> rootComments = commentRepository.findRootCommentsByPostIdOrdered(postId);
+
+        System.out.println("DEBUG: Found " + (rootComments != null ? rootComments.size() : "null") +
+                " root comments");
 
         if (rootComments == null || rootComments.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // Для каждого корневого комментария загружаем ответы
+        // 2. Для каждого корневого комментария загружаем ответы
         for (Comment rootComment : rootComments) {
             if (rootComment != null) {
+                // Инициализируем коллекцию, если она null
+                if (rootComment.getReplies() == null) {
+                    rootComment.setReplies(new ArrayList<>());
+                }
                 loadRepliesRecursively(rootComment);
+
+                System.out.println("DEBUG: Comment " + rootComment.getId() +
+                        " has " + rootComment.getReplies().size() + " replies");
             }
         }
 

@@ -208,10 +208,9 @@
             <div th:if="${post.author == currentUsername}">
                 <form th:action="@{'/posts/delete/' + ${post.id}}" method="post"
                       onsubmit="return confirm('Вы уверены, что хотите удалить этот пост? Все комментарии также будут удалены.');">
-                    <input type="hidden" name="_method" value="delete"/>
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="action-btn delete-btn">
-                        <i class="fas fa-trash"></i> Удалить пост
+                        <i class="fas fa-trash"></i> Удалить
                     </button>
                 </form>
             </div>

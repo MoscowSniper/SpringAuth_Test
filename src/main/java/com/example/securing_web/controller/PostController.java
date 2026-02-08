@@ -1,6 +1,7 @@
 package com.example.securing_web.controller;
 
 import com.example.securing_web.entity.Category;
+import com.example.securing_web.entity.Comment;
 import com.example.securing_web.entity.Post;
 import com.example.securing_web.repository.CategoryRepository;
 import com.example.securing_web.repository.PostRepository;
@@ -9,6 +10,7 @@ import com.example.securing_web.repository.UserRepository;
 import com.example.securing_web.service.CategoryService;
 import com.example.securing_web.service.CommentService;
 import com.example.securing_web.service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,16 +109,39 @@ public class PostController {
         }
     }
 
-    // ==================== ДЕТАЛЬНАЯ СТРАНИЦА ПОСТА ====================
+
 
     @GetMapping("/{id}/view")
     public String viewPost(@PathVariable Long id, Model model) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Пост не найден"));
 
-        // Загружаем древовидные комментарии
-        List<com.example.securing_web.entity.Comment> comments = commentService.getCommentTreeByPostId(id);
-        post.setComments(comments != null ? comments : new ArrayList<>());
+        List<Comment> comments = commentService.getCommentTreeByPostId(id);
+
+        if (comments == null) {
+            comments = new ArrayList<>();
+            System.out.println("WARNING: Comments list is null for post " + id);
+        } else {
+            System.out.println("DEBUG: Loaded " + comments.size() + " comments for post " + id);
+        }
+        post.setComments(comments);
+
+        if (post.getCategory() != null && post.getCategory().getId() != null) {
+
+            Category category = categoryService.getCategoryById(post.getCategory().getId());
+            post.setCategory(category);
+        }
+
+        System.out.println("=== VIEW POST DETAILS ===");
+        System.out.println("Post ID: " + post.getId());
+        System.out.println("Post title: " + post.getTitle());
+        System.out.println("Comments count in post object: " +
+                (post.getComments() != null ? post.getComments().size() : "null"));
+
+        if (post.getComments() != null && !post.getComments().isEmpty()) {
+            System.out.println("First comment author: " + post.getComments().get(0).getAuthor());
+            System.out.println("First comment content: " + post.getComments().get(0).getContent());
+        }
 
         model.addAttribute("post", post);
         model.addAttribute("commentService", commentService);
@@ -122,6 +149,7 @@ public class PostController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
         model.addAttribute("currentUsername", currentUsername);
+
 
         return "postDetail";
     }
@@ -151,7 +179,7 @@ public class PostController {
 
     // ==================== УДАЛЕНИЕ ПОСТА ====================
 
-    @DeleteMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     @Transactional
     public String deletePost(@PathVariable Long id,
                              @AuthenticationPrincipal UserDetails userDetails) {
@@ -165,12 +193,10 @@ public class PostController {
             return "redirect:/posts?error=not_authorized";
         }
 
-        // Сохраняем ID категории для редиректа
         Long categoryId = post.getCategory() != null ? post.getCategory().getId() : null;
 
         postRepository.delete(post);
 
-        // Редирект в зависимости от контекста
         if (categoryId != null) {
             return "redirect:/categories/" + categoryId + "?success=post_deleted";
         }
@@ -225,9 +251,11 @@ public class PostController {
     // ==================== ДОБАВЛЕНИЕ КОММЕНТАРИЯ К ПОСТУ ====================
 
     @PostMapping("/{id}/comments")
+    @Transactional // Добавляем транзакцию
     public String addComment(@PathVariable("id") Long postId,
                              @RequestParam String text,
-                             @AuthenticationPrincipal UserDetails userDetails) {
+                             @AuthenticationPrincipal UserDetails userDetails,
+                             HttpServletRequest request) {
 
         if (text == null || text.trim().isEmpty()) {
             return "redirect:/posts/" + postId + "/view?error=empty_comment";
@@ -239,11 +267,28 @@ public class PostController {
 
         String author = userDetails.getUsername();
 
+        System.out.println("=== ADDING COMMENT ===");
+        System.out.println("Post ID: " + postId);
+        System.out.println("Author: " + author);
+        System.out.println("Content length: " + text.length());
+
         try {
-            com.example.securing_web.entity.Comment comment = commentService.addComment(postId, author, text.trim());
+            // 1. Сохраняем комментарий
+            Comment comment = commentService.addComment(postId, author, text.trim());
+
+            System.out.println("Comment saved with ID: " + comment.getId());
+
+            // 2. ПРИНУДИТЕЛЬНО обновляем кэш Hibernate
+            // Это важно для того, чтобы следующий запрос получил свежие данные
+            postRepository.flush(); // Синхронизируем с БД
+
+            // 3. Редирект с якорем на новый комментарий
             return "redirect:/posts/" + postId + "/view?success=comment_added#comment-" + comment.getId();
+
         } catch (IllegalArgumentException e) {
-            return "redirect:/posts/" + postId + "/view?error=comment_error&message=" + e.getMessage();
+            System.err.println("Error adding comment: " + e.getMessage());
+            return "redirect:/posts/" + postId + "/view?error=comment_error&message=" +
+                    URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 
