@@ -19,9 +19,11 @@
         <li><a th:href="@{/hello}" class="active"><i class="fas fa-home"></i> Главная</a></li>
         <li><a th:href="@{/posts/create}"><i class="fas fa-plus-circle"></i> Создать пост</a></li>
         <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Посты</a></li>
+        <li><a th:href="@{/categories}"><i class="fas fa-comments"></i> Разделы</a></li>
         <li sec:authorize="hasRole('ADMIN')">
             <a th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt"></i> Админ-панель</a>
             <a th:href="@{/admin/groups}"><i class="fas fa-users"></i> Управление группами</a>
+            <a th:href="@{/admin/categories}"><i class="fas fa-folder"></i> Управление разделами</a>
         </li>
         </li>
     </ul>

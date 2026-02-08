@@ -58,6 +58,7 @@
         <li><a th:href="@{/hello}" class="active"><i class="fas fa-home"></i> Главная</a></li>
         <li><a th:href="@{/posts/create}"><i class="fas fa-plus-circle"></i> Создать пост</a></li>
         <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Посты</a></li>
+        <li><a th:href="@{/categories}"><i class="fas fa-folder-open"></i> Все разделы</a></li>
     </ul>
 
     <div class="user-info" style="margin-top: auto; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: 1rem;">
@@ -99,6 +100,26 @@
                        required maxlength="255">
                 <div style="font-size: 0.875rem; color: var(--clr-text-light); margin-top: 0.5rem;">
                     Будьте конкретны и ясны в формулировке
+                </div>
+            </div>
+
+            <!-- ★ НОВОЕ: Выбор категории -->
+            <div class="form-group">
+                <label for="category" class="form-label">
+                    <i class="fas fa-folder"></i> Раздел
+                </label>
+                <select id="category" name="categoryId" class="form-input"
+                        th:value="${selectedCategoryId}"
+                        th:attr="data-original-category='${selectedCategoryId}'">
+                    <option value="">Без раздела (общий)</option>
+                    <option th:each="category : ${creatableCategories}"
+                            th:value="${category.id}"
+                            th:selected="${selectedCategoryId == category.id}"
+                            th:text="${category.name} + (${category.visibleToAll} ? '' : ' 🔒')">
+                    </option>
+                </select>
+                <div style="font-size: 0.875rem; color: var(--clr-text-light); margin-top: 0.5rem;">
+                    Выберите раздел для вашего поста. Некоторые разделы могут быть ограничены.
                 </div>
             </div>
 
@@ -183,6 +204,15 @@
                     this.style.borderColor = 'var(--clr-danger)';
                 }
             });
+        }
+
+        // Сохранение выбранной категории при ошибке
+        const categorySelect = document.getElementById('category');
+        if (categorySelect) {
+            const originalCategory = categorySelect.getAttribute('data-original-category');
+            if (originalCategory) {
+                categorySelect.value = originalCategory;
+            }
         }
     });
 </script>

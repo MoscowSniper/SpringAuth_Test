@@ -36,6 +36,10 @@ public class Post {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
@@ -128,6 +132,9 @@ public class Post {
     public void setVotes(List<PostVote> votes) {
         this.votes = votes;
     }
+    public Category getCategory() { return category; }
+
+    public void setCategory(Category category) { this.category = category; }
 
     // ★ ★ ★ ДОБАВЛЕНО: геттеры для дат ★ ★ ★
     public LocalDateTime getCreatedAt() {

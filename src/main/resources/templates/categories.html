@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Разделы форума</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--clr-primary);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .category-card.restricted {
+            border-top-color: var(--clr-danger);
+        }
+
+        .category-card.read-only {
+            border-top-color: var(--clr-warning);
+        }
+
+        .category-header {
+            margin-bottom: 1rem;
+        }
+
+        .category-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--clr-text-dark);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .category-description {
+            color: var(--clr-text-light);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .category-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--clr-text-light);
+            margin-bottom: 1rem;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .access-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .access-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2><a href="/" style="color: white; text-decoration: none;">Форум</a></h2>
+        <div class="subtitle">Все разделы</div>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li><a th:href="@{/hello}"><i class="fas fa-home"></i> Главная</a></li>
+        <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Все посты</a></li>
+        <li><a th:href="@{/posts/create}"><i class="fas fa-plus-circle"></i> Создать пост</a></li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/categories}"><i class="fas fa-folder"></i> Управление разделами</a>
+        </li>
+    </ul>
+
+    <div class="user-info" sec:authorize="isAuthenticated()">
+        <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+        <div style="font-size: 0.875rem;" sec:authentication="name"></div>
+    </div>
+
+    <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()">
+        <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+        <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </form>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <h1><i class="fas fa-folder-open"></i> Все разделы форума</h1>
+        <div class="subtitle">Выберите раздел для просмотра обсуждений</div>
+    </div>
+
+    <div th:if="${accessibleCategories.isEmpty()}" class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <h3>Нет доступных разделов</h3>
+        <p>Обратитесь к администратору для получения доступа</p>
+    </div>
+
+    <div class="categories-grid" th:if="${not accessibleCategories.isEmpty()}">
+        <div th:each="category : ${accessibleCategories}"
+             th:classappend="${category.visibleToAll ? '' : 'restricted'} +
+                         ${category.studentsCanCreatePosts ? '' : ' read-only'}"
+             class="category-card">
+
+            <div class="category-header">
+                <h3 class="category-name" th:text="${category.name}">Название раздела</h3>
+
+                <div class="access-info">
+          <span th:if="${category.visibleToAll}"
+                class="access-badge" style="background: var(--clr-success); color: white;">
+            <i class="fas fa-globe"></i> Открытый
+          </span>
+                    <span th:unless="${category.visibleToAll}"
+                          class="access-badge" style="background: var(--clr-danger); color: white;">
+            <i class="fas fa-lock"></i> Закрытый
+          </span>
+
+                    <span th:if="${category.studentsCanCreatePosts}"
+                          class="access-badge" style="background: var(--clr-primary); color: white;">
+            <i class="fas fa-pen"></i> Можно писать
+          </span>
+                    <span th:unless="${category.studentsCanCreatePosts}"
+                          class="access-badge" style="background: var(--clr-warning); color: white;">
+            <i class="fas fa-eye"></i> Только чтение
+          </span>
+
+                    <span th:if="${category.teacher != null}"
+                          class="access-badge" style="background: var(--clr-primary-light); color: white;">
+            <i class="fas fa-chalkboard-teacher"></i> 
+            <span th:text="${category.teacher.fullName != null ? category.teacher.fullName : category.teacher.username}"></span>
+          </span>
+                </div>
+            </div>
+
+            <p class="category-description" th:text="${category.description ?: 'Нет описания'}">
+                Описание раздела
+            </p>
+
+            <div class="category-actions">
+                <a th:href="@{/posts(categoryId=${category.id})}" class="submit-btn" style="flex: 1; text-align: center;">
+                    <i class="fas fa-eye"></i> Просмотреть
+                </a>
+
+                <a th:href="@{/posts/create(categoryId=${category.id})}"
+                   th:if="${category.canStudentCreatePosts(currentUser)}"
+                   class="action-btn" title="Создать пост">
+                    <i class="fas fa-plus"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

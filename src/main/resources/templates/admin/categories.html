@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Управление разделами</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .category-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--clr-primary);
+        }
+
+        .category-card.restricted {
+            border-left-color: var(--clr-danger);
+        }
+
+        .access-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-left: 0.5rem;
+        }
+
+        .badge-public {
+            background: var(--clr-success);
+            color: white;
+        }
+
+        .badge-restricted {
+            background: var(--clr-danger);
+            color: white;
+        }
+
+        .badge-student-create {
+            background: var(--clr-warning);
+            color: white;
+        }
+
+        .group-tag {
+            display: inline-block;
+            background: var(--clr-bg);
+            color: var(--clr-text-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2><a href="/" style="color: white; text-decoration: none;">Форум</a></h2>
+        <div class="subtitle">Управление разделами</div>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li><a th:href="@{/hello}"><i class="fas fa-home"></i> Главная</a></li>
+        <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Посты</a></li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt"></i> Панель управления</a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/groups}"><i class="fas fa-users"></i> Группы</a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/categories}" class="active"><i class="fas fa-folder"></i> Разделы</a>
+        </li>
+    </ul>
+
+    <div class="user-info" sec:authorize="isAuthenticated()">
+        <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+        <div style="font-size: 0.875rem;" sec:authentication="name"></div>
+    </div>
+
+    <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()">
+        <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+        <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </form>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <h1><i class="fas fa-folder"></i> Управление разделами</h1>
+        <div class="subtitle">Создавайте разделы с различными правами доступа</div>
+    </div>
+
+    <!-- Уведомления -->
+    <div th:if="${success}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+    </div>
+
+    <!-- Статистика -->
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-number" th:text="${totalCategories}">0</div>
+            <div class="stat-label">Всего разделов</div>
+        </div>
+    </div>
+
+    <!-- Форма создания раздела -->
+    <div class="card">
+        <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-plus-circle"></i> Создать новый раздел</h2>
+
+        <form th:action="@{/admin/categories/create}" method="post">
+            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+
+            <div class="form-group">
+                <label for="categoryName" class="form-label">Название раздела *</label>
+                <input type="text" id="categoryName" name="name" class="form-input"
+                       placeholder="Например: Программирование, Математика" required maxlength="100">
+            </div>
+
+            <div class="form-group">
+                <label for="categoryDescription" class="form-label">Описание</label>
+                <textarea id="categoryDescription" name="description" class="form-input"
+                          placeholder="Описание раздела, темы для обсуждения"
+                          rows="3" maxlength="1000"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Настройки доступа</label>
+
+                <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" name="visibleToAll" value="true" checked>
+                        <span>Виден всем пользователям</span>
+                    </label>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" name="studentsCanCreatePosts" value="true" checked>
+                        <span>Студенты могут создавать посты</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="categoryTeacher" class="form-label">Куратор (преподаватель)</label>
+                <select id="categoryTeacher" name="teacherId" class="form-input">
+                    <option value="">Без куратора</option>
+                    <option th:each="teacher : ${teachers}"
+                            th:value="${teacher.id}"
+                            th:text="${teacher.fullName != null ? teacher.fullName : teacher.username}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Разрешенные группы (если раздел не для всех)</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                    <label th:each="group : ${allGroups}"
+                           style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                        <input type="checkbox" name="allowedGroupIds" th:value="${group.id}">
+                        <span class="group-tag" th:text="${group.name}"></span>
+                    </label>
+                </div>
+                <div class="form-hint">Выберите группы, которым будет доступен раздел</div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> Создать раздел
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Список существующих разделов -->
+    <div class="card">
+        <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-list"></i> Существующие разделы</h2>
+
+        <!-- Пустое состояние -->
+        <div th:if="${categories == null or categories.isEmpty()}" class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <h3>Разделы не созданы</h3>
+            <p>Создайте первый раздел, используя форму выше</p>
+        </div>
+
+        <!-- Список разделов -->
+        <div th:if="${categories != null and not categories.isEmpty()}">
+            <div th:each="category : ${categories}" th:id="'category-' + ${category.id}"
+                 th:classappend="${category.visibleToAll ? 'category-card' : 'category-card restricted'}"
+                 class="category-card">
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--clr-text-dark);" th:text="${category.name}">
+                            Название раздела
+                        </h3>
+
+                        <div style="color: var(--clr-text-light); margin-top: 0.5rem;"
+                             th:text="${category.description} ?: 'Нет описания'">
+                        </div>
+
+                        <div style="margin-top: 0.5rem;">
+              <span class="access-badge"
+                    th:classappend="${category.visibleToAll ? 'badge-public' : 'badge-restricted'}"
+                    th:text="${category.visibleToAll ? 'Открытый' : 'Закрытый'}">
+              </span>
+
+                            <span class="access-badge badge-student-create"
+                                  th:if="${category.studentsCanCreatePosts}">
+                Студенты могут писать
+              </span>
+
+                            <span th:if="${category.teacher != null}" style="font-size: 0.875rem; margin-left: 0.5rem;">
+                <i class="fas fa-chalkboard-teacher"></i> 
+                <span th:text="${category.teacher.fullName != null ? category.teacher.fullName : category.teacher.username}"></span>
+              </span>
+                        </div>
+
+                        <!-- Разрешенные группы -->
+                        <div th:if="${not category.visibleToAll and not category.allowedGroups.isEmpty()}"
+                             style="margin-top: 0.5rem;">
+                            <div style="font-size: 0.875rem; color: var(--clr-text-light); margin-bottom: 0.25rem;">
+                                <i class="fas fa-user-graduate"></i> Доступные группы:
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                <span th:each="group : ${category.allowedGroups}"
+                      class="group-tag" th:text="${group.name}">
+                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Кнопки действий -->
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button type="button" class="action-btn" th:onclick="'showEditForm(' + ${category.id} + ')'">
+                            <i class="fas fa-edit"></i> Изменить
+                        </button>
+                        <form th:action="@{/admin/categories/{id}/delete(id=${category.id})}" method="post"
+                              onsubmit="return confirm('Удалить раздел? Все посты в этом разделе будут перемещены в общий раздел.');">
+                            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+                            <button type="submit" class="action-btn delete-btn">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Форма редактирования раздела -->
+                <div th:id="'edit-form-' + ${category.id}" style="display: none; background: var(--clr-bg); padding: 1.5rem; border-radius: var(--radius); margin-top: 1rem;">
+                    <h4 style="margin-bottom: 1rem;">Редактировать раздел</h4>
+                    <form th:action="@{/admin/categories/{id}/update(id=${category.id})}" method="post">
+                        <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <label class="form-label">Название</label>
+                                <input type="text" name="name" th:value="${category.name}" class="form-input" required>
+                            </div>
+                            <div>
+                                <label class="form-label">Куратор</label>
+                                <select name="teacherId" class="form-input">
+                                    <option value="">Без куратора</option>
+                                    <option th:each="teacher : ${teachers}"
+                                            th:value="${teacher.id}"
+                                            th:selected="${category.teacher != null and category.teacher.id == teacher.id}"
+                                            th:text="${teacher.fullName != null ? teacher.fullName : teacher.username}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label class="form-label">Описание</label>
+                            <textarea name="description" class="form-input" rows="2"
+                                      th:text="${category.description}"></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" name="visibleToAll" th:checked="${category.visibleToAll}">
+                                <span>Виден всем</span>
+                            </label>
+
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" name="studentsCanCreatePosts" th:checked="${category.studentsCanCreatePosts}">
+                                <span>Студенты могут писать</span>
+                            </label>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label class="form-label">Разрешенные группы</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                                <label th:each="group : ${allGroups}"
+                                       style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                                    <input type="checkbox" name="allowedGroupIds" th:value="${group.id}"
+                                           th:checked="${category.allowedGroups.contains(group)}">
+                                    <span class="group-tag" th:text="${group.name}"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-save"></i> Сохранить
+                            </button>
+                            <button type="button" class="action-btn" th:onclick="'hideEditForm(' + ${category.id} + ')'">
+                                <i class="fas fa-times"></i> Отмена
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Функции для показа/скрытия форм редактирования
+    function showEditForm(categoryId) {
+        const form = document.getElementById('edit-form-' + categoryId);
+        if (form) {
+            form.style.display = 'block';
+            form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    function hideEditForm(categoryId) {
+        const form = document.getElementById('edit-form-' + categoryId);
+        if (form) {
+            form.style.display = 'none';
+        }
+    }
+
+    // Автоматическое скрытие уведомлений
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(alert => {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.5s';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
+</script>
+</body>
+</html>

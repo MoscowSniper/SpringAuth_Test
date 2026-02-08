@@ -2,8 +2,10 @@ package com.example.securing_web.config;
 
 import com.example.securing_web.entity.Role;
 import com.example.securing_web.entity.User;
+import com.example.securing_web.entity.Category;
 import com.example.securing_web.repository.RoleRepository;
 import com.example.securing_web.repository.UserRepository;
+import com.example.securing_web.repository.CategoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -18,13 +20,16 @@ public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(RoleRepository roleRepository,
                            UserRepository userRepository,
+                           CategoryRepository categoryRepository,
                            PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -40,8 +45,11 @@ public class DataInitializer implements CommandLineRunner {
             // 2. Создаем администратора
             initAdmin();
 
-            // 3. Создаем тестового пользователя (опционально)
+            // 3. Создаем тестовых пользователей
             initTestUsers();
+
+            // 4. Создаем тестовые категории
+            initTestCategories();
 
             logger.info("=== ИНИЦИАЛИЗАЦИЯ ДАННЫХ УСПЕШНО ЗАВЕРШЕНА ===");
         } catch (Exception e) {
@@ -113,7 +121,9 @@ public class DataInitializer implements CommandLineRunner {
     private void initTestUsers() {
         // Создаем тестовых пользователей для демонстрации
         createUserIfNotExists("student1", "student123", "Иван Студентов", "ROLE_STUDENT");
+        createUserIfNotExists("student2", "student456", "Мария Умнова", "ROLE_STUDENT");
         createUserIfNotExists("teacher1", "teacher123", "Петр Преподавателев", "ROLE_TEACHER");
+        createUserIfNotExists("teacher2", "teacher456", "Анна Научнова", "ROLE_TEACHER");
     }
 
     private void createUserIfNotExists(String username, String password, String fullName, String roleName) {
@@ -130,6 +140,62 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(user);
 
             logger.info("Создан тестовый пользователь: {} / {}", username, password);
+        }
+    }
+
+    private void initTestCategories() {
+        logger.info("Создание тестовых категорий...");
+
+        // 1. Общая категория для всех
+        createCategoryIfNotExists("Общие обсуждения",
+                "Общие вопросы и обсуждения для всех студентов. Здесь можно задавать любые вопросы, не связанные с учебными предметами.");
+
+        // 2. Категория только для преподавателей
+        createCategoryIfNotExists("Преподавательский раздел",
+                "Внутренние обсуждения преподавателей. Организационные вопросы и координация учебного процесса.",
+                false, false);
+
+        // 3. Категория для программирования (видна всем, студенты могут писать)
+        createCategoryIfNotExists("Программирование",
+                "Обсуждение языков программирования, алгоритмов и проектов. Помощь с кодом и обмен опытом.");
+
+        // 4. Категория для математики
+        createCategoryIfNotExists("Математика",
+                "Обсуждение математических задач, теории и практики. Помощь с решением задач.");
+
+        // 5. Категория для физики
+        createCategoryIfNotExists("Физика",
+                "Обсуждение физических законов, экспериментов и решения задач.");
+
+        // 6. Категория для проектов (только для просмотра студентами)
+        createCategoryIfNotExists("Примеры проектов",
+                "Примеры успешных студенческих проектов для ознакомления.",
+                true, false);
+
+        // 7. Категория для администраторов
+        createCategoryIfNotExists("Административный раздел",
+                "Внутренние обсуждения администрации системы.",
+                false, false);
+
+        logger.info("Тестовые категории созданы успешно");
+    }
+
+    private void createCategoryIfNotExists(String name, String description) {
+        createCategoryIfNotExists(name, description, true, true);
+    }
+
+    private void createCategoryIfNotExists(String name, String description,
+                                           boolean visibleToAll, boolean studentsCanCreate) {
+        if (!categoryRepository.existsByName(name)) {
+            Category category = new Category();
+            category.setName(name);
+            category.setDescription(description);
+            category.setVisibleToAll(visibleToAll);
+            category.setStudentsCanCreatePosts(studentsCanCreate);
+            categoryRepository.save(category);
+            logger.info("Создана категория: {}", name);
+        } else {
+            logger.info("Категория уже существует: {}", name);
         }
     }
 }

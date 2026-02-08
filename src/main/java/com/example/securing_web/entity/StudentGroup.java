@@ -19,6 +19,9 @@ public class StudentGroup {
     @Column(length = 1000)
     private String description;
 
+    @ManyToMany(mappedBy = "allowedGroups", fetch = FetchType.LAZY)
+    private Set<Category> categories = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id")
     private User teacher; // Куратор группы (преподаватель)
@@ -69,6 +72,9 @@ public class StudentGroup {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Set<Category> getCategories() { return categories; }
+    public void setCategories(Set<Category> categories) { this.categories = categories; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }

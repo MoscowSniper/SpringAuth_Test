@@ -18,4 +18,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%')) ORDER BY p.createdAt DESC")
     List<Post> searchByQueryOrdered(@Param("query") String query);
+
+    List<Post> findByCategoryIdOrderByCreatedAtDesc(Long categoryId);
+    List<Post> findByCategoryIdAndAuthor(Long categoryId, String author);
+
+    @Query("SELECT p FROM Post p WHERE p.category.id = :categoryId " +
+            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "ORDER BY p.createdAt DESC")
+    List<Post> searchByCategoryAndQuery(@Param("categoryId") Long categoryId,
+                                        @Param("query") String query);
+
+    @Query("SELECT p FROM Post p WHERE p.category.id IN :categoryIds ORDER BY p.createdAt DESC")
+    List<Post> findByCategoriesOrdered(@Param("categoryIds") List<Long> categoryIds);
 }
