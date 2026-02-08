@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Создать раздел</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            color: var(--clr-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .cancel-btn {
+            padding: 0.75rem 2rem;
+            background: var(--clr-bg);
+            color: var(--clr-text-dark);
+            border: 2px solid var(--clr-border);
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cancel-btn:hover {
+            background: var(--clr-border);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2><a href="/static" style="color: white; text-decoration: none;">Форум</a></h2>
+        <div class="subtitle">Новый раздел</div>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li><a th:href="@{/categories}"><i class="fas fa-arrow-left"></i> Все разделы</a></li>
+        <li><a th:href="@{/posts}"><i class="fas fa-stream"></i> Все посты</a></li>
+        <li><a th:href="@{/posts/create}"><i class="fas fa-plus-circle"></i> Создать пост</a></li>
+        <li><a th:href="@{/contact}"><i class="fas fa-users"></i> Пользователи</a></li>
+    </ul>
+
+    <div class="user-info" style="margin-top: auto; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: 1rem;">
+        <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+        <div style="font-size: 0.875rem;" th:text="${currentUsername}">Пользователь</div>
+    </div>
+
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </form>
+</div>
+
+<div class="main">
+    <a th:href="@{/categories}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Назад к разделам
+    </a>
+
+    <div class="create-post-form">
+        <h1 style="margin-bottom: 2rem; color: var(--clr-primary-dark);">
+            <i class="fas fa-folder-plus"></i> Создать новый раздел
+        </h1>
+
+        <!-- Сообщение об ошибке -->
+        <div th:if="${error != null}" class="error-message">
+            <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}">Ошибка</span>
+        </div>
+
+        <form th:action="@{/categories/create}" method="post">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div class="form-group">
+                <label for="name" class="form-label">
+                    <i class="fas fa-heading"></i> Название раздела
+                </label>
+                <input type="text" id="name" name="name"
+                       class="form-input" placeholder="Например: 'Программирование', 'Игры', 'Книги'"
+                       required maxlength="100" th:value="${param.name}">
+                <div style="font-size: 0.875rem; color: var(--clr-text-light); margin-top: 0.5rem;">
+                    Краткое и понятное название (максимум 100 символов)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">
+                    <i class="fas fa-align-left"></i> Описание раздела
+                </label>
+                <textarea id="description" name="description"
+                          class="form-input" rows="4"
+                          placeholder="Опишите, о чем будут посты в этом разделе..."
+                          maxlength="500" th:text="${param.description}"></textarea>
+                <div style="font-size: 0.875rem; color: var(--clr-text-light); margin-top: 0.5rem;">
+                    Необязательное поле (максимум 500 символов)
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/categories}" class="cancel-btn">
+                    <i class="fas fa-times"></i> Отмена
+                </a>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-check"></i> Создать раздел
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Счетчик символов для description
+        const descriptionTextarea = document.getElementById('description');
+        const nameInput = document.getElementById('name');
+
+        if (descriptionTextarea) {
+            const charCounter = document.createElement('div');
+            charCounter.style.fontSize = '0.875rem';
+            charCounter.style.color = 'var(--clr-text-light)';
+            charCounter.style.marginTop = '0.5rem';
+            charCounter.innerHTML = 'Осталось символов: <span id="charCount">500</span>';
+            descriptionTextarea.parentNode.insertBefore(charCounter, descriptionTextarea.nextSibling);
+
+            function updateCharCount() {
+                const maxLength = 500;
+                const currentLength = descriptionTextarea.value.length;
+                const remaining = maxLength - currentLength;
+
+                const charCountSpan = document.getElementById('charCount');
+                if (charCountSpan) {
+                    charCountSpan.textContent = remaining;
+
+                    if (remaining < 50) {
+                        charCountSpan.style.color = '#ef4444';
+                    } else if (remaining < 100) {
+                        charCountSpan.style.color = '#f59e0b';
+                    } else {
+                        charCountSpan.style.color = '';
+                    }
+                }
+            }
+
+            descriptionTextarea.addEventListener('input', updateCharCount);
+            updateCharCount(); // Инициализация
+        }
+
+        // Валидация name
+        if (nameInput) {
+            nameInput.addEventListener('blur', function() {
+                if (this.value.trim().length < 3) {
+                    this.style.borderColor = '#ef4444';
+                } else {
+                    this.style.borderColor = '';
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Форум - Список постов</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Дополнительные стили для древовидных комментариев */
+    .reply-form-container {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--clr-border);
+    }
+
+    .reply-form-container.active {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .comment-depth-1 { margin-left: 2rem; }
+    .comment-depth-2 { margin-left: 4rem; }
+    .comment-depth-3 { margin-left: 6rem; }
+    .comment-depth-4 { margin-left: 8rem; }
+
+    .comment:hover {
+      background: #f8fafc;
+    }
+
+    .no-comments {
+      text-align: center;
+      padding: 3rem;
+      color: var(--clr-text-light);
+      font-style: italic;
+    }
+
+    .no-comments i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .post-stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--clr-border);
+      color: var(--clr-text-light);
+      font-size: 0.875rem;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Стили для пустого состояния */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--clr-text-light);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      color: var(--clr-text-dark);
+      margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+      max-width: 500px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="/" style="color: white; text-decoration: none;">Форум</a></h2>
+    <div class="subtitle">Общение без границ</div>
+  </div>
+
+  <ul class="sidebar-nav">
+    <!-- Добавляем ссылку на разделы -->
+    <li><a th:href="@{/categories}">Разделы</a></li>
+    <li><a th:href="@{/posts/create}"><i class="fas fa-plus-circle"></i> Создать пост</a></li>
+    <li><a th:href="@{/posts}"><i class="fas fa-stream"></i> Все посты</a></li>
+    <li><a th:href="@{/contact}"><i class="fas fa-users"></i> Пользователи</a></li>
+    <li><a href="#"><i class="fas fa-star"></i> Избранное</a></li>
+    <li><a href="#"><i class="fas fa-bell"></i> Уведомления</a></li>
+  </ul>
+
+  <div class="user-info" style="margin-top: auto; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: 1rem;">
+    <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+    <div style="font-size: 0.875rem;" th:text="${currentUsername}">Пользователь</div>
+  </div>
+
+  <form th:action="@{/logout}" method="post">
+    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Выйти
+    </button>
+  </form>
+</div>
+
+<div class="main">
+  <!-- Заголовок страницы -->
+  <div class="page-header">
+    <h1><i class="fas fa-comments"></i> Обсуждения</h1>
+    <a th:href="@{/posts/create}" class="submit-btn">
+      <i class="fas fa-plus"></i> Новый пост
+    </a>
+  </div>
+
+  <!-- Сообщения -->
+  <div th:if="${param.success != null}" class="alert alert-success">
+    <span th:if="${param.success == 'post_deleted'}"><i class="fas fa-check-circle"></i> Пост успешно удален!</span>
+    <span th:if="${param.success == 'comment_added'}"><i class="fas fa-check-circle"></i> Комментарий добавлен!</span>
+    <span th:if="${param.success == 'reply_added'}"><i class="fas fa-check-circle"></i> Ответ добавлен!</span>
+    <span th:if="${param.success == 'post_created'}"><i class="fas fa-check-circle"></i> Пост создан!</span>
+  </div>
+
+  <div th:if="${param.error != null}" class="alert alert-error">
+    <span th:if="${param.error == 'not_authorized'}"><i class="fas fa-exclamation-triangle"></i> У вас нет прав для удаления этого поста.</span>
+    <span th:if="${param.error == 'empty_comment'}"><i class="fas fa-exclamation-triangle"></i> Комментарий не может быть пустым.</span>
+    <span th:if="${param.error == 'empty_reply'}"><i class="fas fa-exclamation-triangle"></i> Ответ не может быть пустым.</span>
+    <span th:if="${param.error == 'comment_too_long'}"><i class="fas fa-exclamation-triangle"></i> Комментарий слишком длинный.</span>
+    <span th:if="${param.error == 'reply_too_long'}"><i class="fas fa-exclamation-triangle"></i> Ответ слишком длинный.</span>
+  </div>
+
+  <!-- Поиск -->
+  <div style="background: white; padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem; box-shadow: var(--shadow);">
+    <form action="/posts/search" method="get" style="display: flex; gap: 1rem;">
+      <input type="text" name="query"
+             th:value="${searchQuery != null ? searchQuery : ''}"
+             placeholder="Поиск по заголовку или содержанию..."
+             style="flex: 1; padding: 0.75rem; border: 2px solid var(--clr-border); border-radius: var(--radius);">
+      <button type="submit" class="submit-btn" style="padding: 0.75rem 1.5rem;">
+        <i class="fas fa-search"></i> Поиск
+      </button>
+    </form>
+  </div>
+
+  <!-- Пустое состояние -->
+  <div th:if="${posts != null and posts.isEmpty()}" class="empty-state">
+    <i class="fas fa-comment-slash"></i>
+    <h3>Пока нет постов</h3>
+    <p>Будьте первым, кто создаст интересное обсуждение! Напишите о том, что вас волнует, задайте вопрос или поделитесь опытом.</p>
+    <a th:href="@{/posts/create}" class="submit-btn" style="display: inline-block;">
+      <i class="fas fa-plus"></i> Создать первый пост
+    </a>
+  </div>
+
+  <!-- Карточки постов -->
+  <div th:each="post : ${posts}" th:id="'post-' + ${post.id}" class="post-card">
+    <!-- Заголовок поста -->
+    <div class="post-header">
+      <div style="flex: 1;">
+        <h2 class="post-title" th:text="${post.title}">Заголовок поста</h2>
+        <div class="post-meta">
+          <span class="post-author" th:text="${post.author}">Автор</span>
+          <span>•</span>
+          <!-- ★ Используем commentService для форматирования даты ★ -->
+          <span th:text="${commentService.formatPostDateTime(post.createdAt)}">Дата</span>
+        </div>
+      </div>
+
+      <!-- Кнопка удаления (только для автора) -->
+      <div th:if="${post.author == currentUsername}" class="ml-3">
+        <form th:action="@{'/posts/delete/' + ${post.id}}" method="post"
+              onsubmit="return confirm('Вы уверены, что хотите удалить этот пост? Все комментарии также будут удалены.');">
+          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="action-btn delete-btn">
+            <i class="fas fa-trash"></i> Удалить
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Содержание поста -->
+    <div class="post-content" th:text="${post.content}">
+      Содержание поста...
+    </div>
+
+    <!-- Статистика и действия -->
+    <div class="post-stats">
+      <div class="stat-item">
+        <i class="fas fa-comment"></i>
+        <span th:text="${post.comments != null ? post.comments.size() : 0}">0</span> комментариев
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-thumbs-up"></i>
+        <span th:text="${post.likes}">0</span> лайков
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-thumbs-down"></i>
+        <span th:text="${post.dislikes}">0</span> дизлайков
+      </div>
+    </div>
+
+    <!-- Кнопки лайков/дизлайков -->
+    <div class="post-actions">
+      <form th:action="@{/posts/{id}/like(id=${post.id})}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="action-btn like-btn">
+          <i class="fas fa-thumbs-up"></i> Нравится (<span th:text="${post.likes}">0</span>)
+        </button>
+      </form>
+
+      <form th:action="@{/posts/{id}/dislike(id=${post.id})}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="action-btn dislike-btn">
+          <i class="fas fa-thumbs-down"></i> Не нравится (<span th:text="${post.dislikes}">0</span>)
+        </button>
+      </form>
+    </div>
+
+    <!-- Секция комментариев -->
+    <div class="comments-section">
+      <div class="comments-header">
+        <span>Комментарии</span>
+        <span class="badge" style="background: var(--clr-primary); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.875rem;"
+              th:text="${post.comments != null ? post.comments.size() : 0}">0</span>
+      </div>
+
+      <!-- Древовидные комментарии -->
+      <div class="comments-tree">
+        <!-- ★ Пустое состояние для комментариев ★ -->
+        <div th:if="${post.comments == null or post.comments.isEmpty()}" class="no-comments">
+          <i class="fas fa-comments"></i>
+          <h4>Пока нет комментариев</h4>
+          <p>Будьте первым, кто оставит комментарий!</p>
+        </div>
+
+        <!-- ★ ★ ★ ИСПРАВЛЕННЫЙ ШАБЛОН КОММЕНТАРИЕВ ★ ★ ★ -->
+        <div th:each="comment : ${post.comments}"
+             th:if="${comment != null and comment.parentComment == null}"
+             th:id="${comment?.id != null ? 'comment-' + comment.id : ''}"
+             class="comment">
+
+          <!-- Шаблон комментария -->
+          <div class="comment-header">
+            <div class="comment-author">
+              <!-- ★ Безопасное получение первой буквы ★ -->
+              <div class="author-avatar"
+                   th:text="${commentService.getFirstLetter(comment?.author)}">
+                A
+              </div>
+              <div>
+                <!-- ★ Безопасное получение имени автора ★ -->
+                <div class="author-name"
+                     th:text="${commentService.getSafeAuthorName(comment?.author)}">
+                  Автор
+                </div>
+                <!-- ★ Безопасное форматирование даты ★ -->
+                <div class="comment-time"
+                     th:text="${commentService.formatDateTime(comment?.createdAt)}">
+                  Время
+                </div>
+              </div>
+            </div>
+
+            <div class="comment-actions">
+              <!-- ★ ИСПРАВЛЕНО: Используем data-атрибуты вместо th:onclick ★ -->
+              <button class="reply-btn"
+                      th:attr="data-comment-id=${comment?.id}"
+                      th:disabled="${comment?.id == null}"
+                      onclick="showReplyFormFromButton(this)">
+                <i class="fas fa-reply"></i> Ответить
+              </button>
+            </div>
+          </div>
+
+          <!-- ★ Безопасное получение содержания ★ -->
+          <div class="comment-content"
+               th:text="${commentService.getSafeContent(comment?.content)}">
+            Текст комментария...
+          </div>
+
+          <!-- Форма ответа (скрыта по умолчанию) -->
+          <div th:id="${comment?.id != null ? 'reply-form-' + comment.id : ''}"
+               class="reply-form-container">
+            <form th:action="${comment?.id != null and comment?.post?.id != null ?
+                                         '/posts/' + comment.post.id + '/comments/' + comment.id + '/reply' : '#'}"
+                  method="post" class="comment-form" style="margin: 0;">
+              <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+              <textarea name="text" class="comment-input"
+                        placeholder="Ваш ответ на этот комментарий..."
+                        maxlength="2000" required
+                        th:id="${comment?.id != null ? 'reply-textarea-' + comment.id : ''}"></textarea>
+
+              <div class="form-footer" style="margin-top: 1rem;">
+                <div class="char-counter">
+                  Осталось символов:
+                  <span th:id="${comment?.id != null ? 'reply-counter-' + comment.id : ''}">2000</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <!-- ★ ИСПРАВЛЕНО: Кнопка Отмена через data-атрибут ★ -->
+                  <button type="button" class="action-btn"
+                          th:attr="data-comment-id=${comment?.id}"
+                          onclick="hideReplyFormFromButton(this)">
+                    Отмена
+                  </button>
+                  <button type="submit" class="submit-btn">
+                    <i class="fas fa-reply"></i> Ответить
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Ответы на этот комментарий -->
+          <div th:if="${comment?.replies != null and not comment.replies.isEmpty()}" class="mt-3">
+            <div th:each="reply : ${comment.replies}"
+                 th:if="${reply != null}"
+                 th:classappend="'comment-depth-' + ${#lists.size(reply?.replies) > 0 ? #lists.size(reply.replies) : 1}"
+                 class="comment reply">
+
+              <!-- Шаблон ответа -->
+              <div class="comment-header">
+                <div class="comment-author">
+                  <div class="author-avatar"
+                       th:text="${commentService.getFirstLetter(reply?.author)}">
+                    A
+                  </div>
+                  <div>
+                    <div class="author-name"
+                         th:text="${commentService.getSafeAuthorName(reply?.author)}">
+                      Автор
+                    </div>
+                    <div class="comment-time"
+                         th:text="${commentService.formatDateTime(reply?.createdAt)}">
+                      Время
+                    </div>
+                  </div>
+                </div>
+
+                <div class="comment-actions">
+                  <!-- ★ ИСПРАВЛЕНО: Используем data-атрибуты ★ -->
+                  <button class="reply-btn"
+                          th:attr="data-comment-id=${reply?.id}"
+                          th:disabled="${reply?.id == null}"
+                          onclick="showReplyFormFromButton(this)">
+                    <i class="fas fa-reply"></i> Ответить
+                  </button>
+                </div>
+              </div>
+
+              <div class="comment-content"
+                   th:text="${commentService.getSafeContent(reply?.content)}">
+                Текст комментария...
+              </div>
+
+              <!-- Форма ответа для reply -->
+              <div th:id="${reply?.id != null ? 'reply-form-' + reply.id : ''}"
+                   class="reply-form-container">
+                <form th:action="${reply?.id != null and reply?.post?.id != null ?
+                                                 '/posts/' + reply.post.id + '/comments/' + reply.id + '/reply' : '#'}"
+                      method="post" class="comment-form" style="margin: 0;">
+                  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                  <textarea name="text" class="comment-input"
+                            placeholder="Ваш ответ на этот комментарий..."
+                            maxlength="2000" required
+                            th:id="${reply?.id != null ? 'reply-textarea-' + reply.id : ''}"></textarea>
+
+                  <div class="form-footer" style="margin-top: 1rem;">
+                    <div class="char-counter">
+                      Осталось символов:
+                      <span th:id="${reply?.id != null ? 'reply-counter-' + reply.id : ''}">2000</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                      <!-- ★ ИСПРАВЛЕНО: Кнопка Отмена через data-атрибут ★ -->
+                      <button type="button" class="action-btn"
+                              th:attr="data-comment-id=${reply?.id}"
+                              onclick="hideReplyFormFromButton(this)">
+                        Отмена
+                      </button>
+                      <button type="submit" class="submit-btn">
+                        <i class="fas fa-reply"></i> Ответить
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Еще более глубокие уровни -->
+              <div th:if="${reply?.replies != null and not reply.replies.isEmpty()}" class="mt-2">
+                <div th:each="nestedReply : ${reply.replies}"
+                     th:if="${nestedReply != null}"
+                     class="comment reply comment-depth-2">
+
+                  <!-- Шаблон вложенного ответа -->
+                  <div class="comment-header">
+                    <div class="comment-author">
+                      <div class="author-avatar"
+                           th:text="${commentService.getFirstLetter(nestedReply?.author)}">
+                        A
+                      </div>
+                      <div>
+                        <div class="author-name"
+                             th:text="${commentService.getSafeAuthorName(nestedReply?.author)}">
+                          Автор
+                        </div>
+                        <div class="comment-time"
+                             th:text="${commentService.formatDateTime(nestedReply?.createdAt)}">
+                          Время
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="comment-content"
+                       th:text="${commentService.getSafeContent(nestedReply?.content)}">
+                    Текст комментария...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Форма добавления комментария -->
+      <div class="comment-form-container">
+        <div class="comment-form-title">
+          <i class="fas fa-edit"></i> Добавить комментарий
+        </div>
+
+        <form th:action="@{'/posts/' + ${post.id} + '/comments'}" method="post" class="comment-form">
+          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+          <textarea name="text" class="comment-input"
+                    placeholder="Напишите ваш комментарий здесь..."
+                    maxlength="2000" required></textarea>
+
+          <div class="form-footer">
+            <div class="char-counter">Осталось символов: <span class="char-count">2000</span></div>
+            <button type="submit" class="submit-btn">
+              <i class="fas fa-paper-plane"></i> Отправить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // JavaScript для функциональности
+  document.addEventListener('DOMContentLoaded', function() {
+    // Счетчик символов для всех textarea
+    document.querySelectorAll('.comment-input').forEach(textarea => {
+      const counterId = textarea.id.replace('textarea', 'counter');
+      const counter = document.getElementById(counterId) ||
+              textarea.closest('.form-footer').querySelector('.char-count');
+
+      function updateCounter() {
+        const maxLength = textarea.getAttribute('maxlength') || 2000;
+        const remaining = maxLength - textarea.value.length;
+        if (counter) {
+          counter.textContent = remaining;
+
+          if (remaining < 50) {
+            counter.style.color = '#ef4444';
+          } else if (remaining < 100) {
+            counter.style.color = '#f59e0b';
+          } else {
+            counter.style.color = '';
+          }
+        }
+      }
+
+      textarea.addEventListener('input', updateCounter);
+      updateCounter(); // Инициализация
+    });
+
+    // Прокрутка к комментарию после добавления ответа
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#comment-')) {
+      const commentElement = document.querySelector(hash);
+      if (commentElement) {
+        setTimeout(() => {
+          commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          commentElement.style.animation = 'pulse 2s';
+        }, 300);
+      }
+    }
+
+    // Прокрутка к посту после добавления комментария
+    if (hash && hash.startsWith('#post-')) {
+      const postElement = document.querySelector(hash);
+      if (postElement) {
+        setTimeout(() => {
+          postElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+      }
+    }
+  });
+
+  // ★ ИСПРАВЛЕННЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С DATA-АТРИБУТАМИ ★
+  function showReplyFormFromButton(button) {
+    const commentId = button.getAttribute('data-comment-id');
+    if (commentId && commentId !== 'null' && commentId !== '') {
+      showReplyForm(parseInt(commentId));
+    }
+  }
+
+  function hideReplyFormFromButton(button) {
+    const commentId = button.getAttribute('data-comment-id');
+    if (commentId && commentId !== 'null' && commentId !== '') {
+      hideReplyForm(parseInt(commentId));
+    }
+  }
+
+  // Существующие функции (оставляем для обратной совместимости)
+  function showReplyForm(commentId) {
+    const form = document.getElementById('reply-form-' + commentId);
+    const textarea = document.getElementById('reply-textarea-' + commentId);
+
+    if (form) {
+      // Скрыть все остальные формы ответов
+      document.querySelectorAll('.reply-form-container').forEach(f => {
+        f.classList.remove('active');
+      });
+
+      // Показать нужную форму
+      form.classList.add('active');
+
+      // Фокус на textarea
+      if (textarea) {
+        setTimeout(() => textarea.focus(), 100);
+      }
+
+      // Прокрутка к форме
+      form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function hideReplyForm(commentId) {
+    const form = document.getElementById('reply-form-' + commentId);
+    if (form) {
+      form.classList.remove('active');
+    }
+  }
+
+  // Анимация пульсации
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+    }
+`;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
