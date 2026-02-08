@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <title th:text="${pageTitle != null ? pageTitle + ' - Форум' : 'Форум'}">Форум</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Дополнительные стили для всех страниц */
+    .page-content {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      min-height: calc(100vh - 120px);
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--clr-border);
+    }
+
+    .page-header h1 {
+      color: var(--clr-primary-dark);
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-header .subtitle {
+      color: var(--clr-text-light);
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--clr-text-light);
+      font-size: 0.875rem;
+    }
+
+    .breadcrumb a {
+      color: var(--clr-primary);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .breadcrumb .separator {
+      color: var(--clr-text-lighter);
+    }
+
+    /* Стили для таблиц */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      background: var(--clr-bg);
+      color: var(--clr-text-dark);
+      font-weight: 600;
+      text-align: left;
+      padding: 1rem;
+      border-bottom: 2px solid var(--clr-border);
+    }
+
+    .data-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--clr-border);
+      vertical-align: top;
+    }
+
+    .data-table tr:hover {
+      background: var(--clr-bg);
+    }
+
+    /* Стили для форм */
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--clr-text-dark);
+    }
+
+    .form-hint {
+      font-size: 0.875rem;
+      color: var(--clr-text-light);
+      margin-top: 0.5rem;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--clr-border);
+    }
+
+    /* Стили для списков */
+    .list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .list-item {
+      padding: 1rem;
+      border-bottom: 1px solid var(--clr-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .list-item:hover {
+      background: var(--clr-bg);
+    }
+
+    /* Стили для уведомлений */
+    .notification {
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .notification-info {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #93c5fd;
+    }
+
+    .notification-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .notification-warning {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .notification-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    /* Стили для карточек сеткой */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .grid-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .grid-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Стили для вкладок */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid var(--clr-border);
+      margin-bottom: 2rem;
+    }
+
+    .tab {
+      padding: 1rem 1.5rem;
+      color: var(--clr-text-light);
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab:hover {
+      color: var(--clr-primary);
+    }
+
+    .tab.active {
+      color: var(--clr-primary);
+      border-bottom-color: var(--clr-primary);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      .page-content {
+        padding: 1rem;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .data-table {
+        font-size: 0.875rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Боковое меню -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="/" style="color: white; text-decoration: none;">Форум</a></h2>
+    <div class="subtitle" th:text="${#dates.format(#dates.createNow(), 'dd.MM.yyyy')}">Дата</div>
+  </div>
+
+  <ul class="sidebar-nav">
+    <!-- Основные разделы -->
+    <li><a th:href="@{/}" th:classappend="${#httpServletRequest.requestURI == '/' ? 'active' : ''}">
+      <i class="fas fa-home"></i> Главная
+    </a></li>
+
+    <li><a th:href="@{/posts}" th:classappend="${#httpServletRequest.requestURI.startsWith('/posts') ? 'active' : ''}">
+      <i class="fas fa-comments"></i> Посты
+    </a></li>
+
+    <li><a th:href="@{/forum}" th:classappend="${#httpServletRequest.requestURI == '/forum' ? 'active' : ''}">
+      <i class="fas fa-list"></i> Форум
+    </a></li>
+
+    <!-- Информационные страницы -->
+    <li class="sidebar-section">Информация</li>
+    <li><a th:href="@{/about}" th:classappend="${#httpServletRequest.requestURI == '/about' ? 'active' : ''}">
+      <i class="fas fa-info-circle"></i> О нас
+    </a></li>
+
+    <li><a th:href="@{/contact}" th:classappend="${#httpServletRequest.requestURI == '/contact' ? 'active' : ''}">
+      <i class="fas fa-users"></i> Контакты
+    </a></li>
+
+    <li><a th:href="@{/services}" th:classappend="${#httpServletRequest.requestURI == '/services' ? 'active' : ''}">
+      <i class="fas fa-concierge-bell"></i> Услуги
+    </a></li>
+
+    <li><a th:href="@{/help}" th:classappend="${#httpServletRequest.requestURI == '/help' ? 'active' : ''}">
+      <i class="fas fa-question-circle"></i> Помощь
+    </a></li>
+
+    <li><a th:href="@{/faq}" th:classappend="${#httpServletRequest.requestURI == '/faq' ? 'active' : ''}">
+      <i class="fas fa-question"></i> FAQ
+    </a></li>
+
+    <!-- Для аутентифицированных пользователей -->
+    <li sec:authorize="isAuthenticated()" class="sidebar-section">Аккаунт</li>
+
+    <li sec:authorize="isAuthenticated()">
+      <a th:href="@{/profile}" th:classappend="${#httpServletRequest.requestURI.startsWith('/profile') ? 'active' : ''}">
+        <i class="fas fa-user"></i> Профиль
+      </a>
+    </li>
+
+    <li sec:authorize="isAuthenticated()">
+      <a th:href="@{/posts/create}" th:classappend="${#httpServletRequest.requestURI == '/posts/create' ? 'active' : ''}">
+        <i class="fas fa-plus-circle"></i> Создать пост
+      </a>
+    </li>
+
+    <!-- Для администраторов -->
+    <li sec:authorize="hasRole('ADMIN')" class="sidebar-section">Администрирование</li>
+
+    <li sec:authorize="hasRole('ADMIN')">
+      <a th:href="@{/admin/dashboard}" th:classappend="${#httpServletRequest.requestURI.startsWith('/admin') ? 'active' : ''}">
+        <i class="fas fa-tachometer-alt"></i> Панель управления
+      </a>
+    </li>
+
+    <li sec:authorize="hasRole('ADMIN')">
+      <a th:href="@{/users/create}" th:classappend="${#httpServletRequest.requestURI == '/users/create' ? 'active' : ''}">
+        <i class="fas fa-user-plus"></i> Создать пользователя
+      </a>
+    </li>
+
+    <!-- Правовые документы -->
+    <li class="sidebar-section">Документы</li>
+    <li><a th:href="@{/privacy}" th:classappend="${#httpServletRequest.requestURI == '/privacy' ? 'active' : ''}">
+      <i class="fas fa-shield-alt"></i> Политика конфиденциальности
+    </a></li>
+
+    <li><a th:href="@{/terms}" th:classappend="${#httpServletRequest.requestURI == '/terms' ? 'active' : ''}">
+      <i class="fas fa-file-contract"></i> Условия использования
+    </a></li>
+  </ul>
+
+  <!-- Информация о пользователе -->
+  <div class="user-info" sec:authorize="isAuthenticated()">
+    <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+    <div style="font-size: 0.875rem;" sec:authentication="name"></div>
+    <div style="font-size: 0.75rem; margin-top: 0.25rem; opacity: 0.8;">
+            <span sec:authentication="principal.authorities" th:each="role : ${#authentication.principal.authorities}"
+                  th:text="${role.authority.replace('ROLE_', '')}" th:if="${roleStat.first}">
+                Роль
+            </span>
+    </div>
+  </div>
+
+  <!-- Кнопка выхода -->
+  <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Выйти
+    </button>
+  </form>
+
+  <!-- Кнопка входа для неаутентифицированных -->
+  <div sec:authorize="!isAuthenticated()" style="margin-top: auto;">
+    <a th:href="@{/login}" class="logout-btn" style="background: var(--clr-success); text-align: center; display: block;">
+      <i class="fas fa-sign-in-alt"></i> Войти
+    </a>
+  </div>
+</div>
+
+<!-- Основной контент -->
+<div class="main">
+  <!-- Хлебные крошки -->
+  <div class="breadcrumb" th:if="${breadcrumbs}">
+    <a th:href="@{/}">Главная</a>
+    <span class="separator">/</span>
+    <span th:each="crumb, iter : ${breadcrumbs}">
+            <a th:if="${crumb.url}" th:href="@{${crumb.url}}" th:text="${crumb.name}"></a>
+            <span th:unless="${crumb.url}" th:text="${crumb.name}"></span>
+            <span class="separator" th:unless="${iter.last}">/</span>
+        </span>
+  </div>
+
+  <!-- Уведомления -->
+  <div th:if="${notification}" th:classappend="'notification notification-' + ${notification.type}" class="notification">
+    <i th:class="'fas fa-' + ${notification.icon}"></i>
+    <span th:text="${notification.message}"></span>
+  </div>
+
+  <!-- Контент страницы -->
+  <div class="page-content">
+    <!-- Заголовок страницы -->
+    <div class="page-header" th:if="${pageTitle}">
+      <h1>
+        <i th:if="${pageIcon}" th:class="'fas fa-' + ${pageIcon}"></i>
+        <span th:text="${pageTitle}"></span>
+      </h1>
+      <div class="subtitle" th:if="${pageSubtitle}" th:text="${pageSubtitle}"></div>
+    </div>
+
+    <!-- Основной контент (будет заменен в дочерних шаблонах) -->
+    <div th:fragment="content">
+      <!-- Контент страницы -->
+    </div>
+  </div>
+
+  <!-- Футер -->
+  <footer style="background: var(--clr-bg); padding: 2rem; margin-top: auto; border-top: 1px solid var(--clr-border);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <div style="font-weight: 600; margin-bottom: 0.5rem;">Образовательный форум</div>
+        <div style="color: var(--clr-text-light); font-size: 0.875rem;">
+          Платформа для обмена знаниями и обсуждений
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 2rem;">
+        <a th:href="@{/about}" style="color: var(--clr-text-light); text-decoration: none;">О нас</a>
+        <a th:href="@{/contact}" style="color: var(--clr-text-light); text-decoration: none;">Контакты</a>
+        <a th:href="@{/privacy}" style="color: var(--clr-text-light); text-decoration: none;">Конфиденциальность</a>
+        <a th:href="@{/terms}" style="color: var(--clr-text-light); text-decoration: none;">Условия</a>
+      </div>
+
+      <div style="color: var(--clr-text-light); font-size: 0.875rem;">
+        © 2024 Образовательный форум. Все права защищены.
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- JavaScript -->
+<script>
+  // Общие функции для всех страниц
+  document.addEventListener('DOMContentLoaded', function() {
+    // Подтверждение опасных действий
+    document.querySelectorAll('form[data-confirm]').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        if (!confirm(this.dataset.confirm)) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // Переключение видимости пароля
+    document.querySelectorAll('.toggle-password').forEach(button => {
+      button.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        this.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+      });
+    });
+
+    // Счетчик символов
+    document.querySelectorAll('textarea[data-counter]').forEach(textarea => {
+      const counterId = textarea.dataset.counter;
+      const counter = document.getElementById(counterId);
+
+      if (counter) {
+        function updateCounter() {
+          const max = textarea.maxLength || 5000;
+          const remaining = max - textarea.value.length;
+          counter.textContent = remaining;
+
+          if (remaining < 50) {
+            counter.style.color = '#ef4444';
+          } else if (remaining < 100) {
+            counter.style.color = '#f59e0b';
+          } else {
+            counter.style.color = '';
+          }
+        }
+
+        textarea.addEventListener('input', updateCounter);
+        updateCounter();
+      }
+    });
+
+    // Закрытие уведомлений
+    document.querySelectorAll('.notification .close').forEach(button => {
+      button.addEventListener('click', function() {
+        this.parentElement.style.display = 'none';
+      });
+    });
+
+    // Автоматическое скрытие уведомлений через 5 секунд
+    setTimeout(() => {
+      document.querySelectorAll('.notification').forEach(notification => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.5s';
+        setTimeout(() => notification.remove(), 500);
+      });
+    }, 5000);
+  });
+</script>
+
+<!-- Дополнительные скрипты из дочерних шаблонов -->
+<div th:replace="${scripts} ?: ''"></div>
+
+</body>
+</html>

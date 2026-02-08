@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -94,7 +95,12 @@ public class PostController {
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
 
         String currentUsername = userDetails.getUsername();
-        if (!post.getAuthor().equals(currentUsername)) {
+
+        // Проверяем права: либо автор, либо преподаватель/админ
+        boolean isAuthor = post.getAuthor().equals(currentUsername);
+        boolean hasPrivilege = hasRequiredRole(userDetails, "ROLE_TEACHER", "ROLE_ADMIN");
+
+        if (!isAuthor && !hasPrivilege) {
             System.err.println("Security Alert: User '" + currentUsername +
                     "' attempted to delete post by '" + post.getAuthor() + "'");
             return "redirect:/posts?error=not_authorized";
@@ -201,6 +207,10 @@ public class PostController {
     @ResponseBody
     public List<com.example.securing_web.entity.Comment> getPostComments(@PathVariable Long id) {
         return commentService.getCommentTreeByPostId(id);
+    }
+    private boolean hasRequiredRole(UserDetails userDetails, String... roles) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(authority -> Arrays.asList(roles).contains(authority.getAuthority()));
     }
 
     // ★ ДОБАВЛЕНО: Получение количества комментариев

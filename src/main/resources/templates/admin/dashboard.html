@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <title>Административная панель</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-card.students {
+      border-top: 4px solid #4f46e5;
+    }
+
+    .stat-card.teachers {
+      border-top: 4px solid #10b981;
+    }
+
+    .stat-card.admins {
+      border-top: 4px solid #ef4444;
+    }
+
+    .stat-card.total {
+      border-top: 4px solid #f59e0b;
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.8;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--clr-text-light);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .quick-actions {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .action-card {
+      background: var(--clr-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .action-card:hover {
+      background: white;
+      border-color: var(--clr-primary);
+      transform: translateY(-3px);
+    }
+
+    .action-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--clr-primary);
+    }
+
+    .recent-users {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .user-list {
+      margin-top: 1.5rem;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--clr-border);
+    }
+
+    .user-item:last-child {
+      border-bottom: none;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--clr-primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 1rem;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .user-role {
+      font-size: 0.875rem;
+      color: var(--clr-text-light);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--clr-text-light);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="/" style="color: white; text-decoration: none;">Форум</a></h2>
+    <div class="subtitle">Административная панель</div>
+  </div>
+
+  <ul class="sidebar-nav">
+    <li><a th:href="@{/admin/dashboard}" class="active"><i class="fas fa-tachometer-alt"></i> Панель управления</a></li>
+    <li><a th:href="@{/users/create}"><i class="fas fa-user-plus"></i> Создать пользователя</a></li>
+    <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Все посты</a></li>
+    <li><a th:href="@{/contact}"><i class="fas fa-users"></i> Пользователи</a></li>
+  </ul>
+
+  <div class="user-info" sec:authorize="isAuthenticated()">
+    <div style="font-weight: 600; margin-bottom: 0.25rem;">Вы вошли как:</div>
+    <div style="font-size: 0.875rem;" sec:authentication="name">Пользователь</div>
+  </div>
+
+  <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()">
+    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Выйти
+    </button>
+  </form>
+</div>
+
+<div class="main">
+  <div class="dashboard">
+    <!-- Заголовок -->
+    <div class="page-header">
+      <h1><i class="fas fa-tachometer-alt"></i> Панель управления</h1>
+      <div class="current-user" sec:authorize="isAuthenticated()">
+        Вы вошли как: <strong sec:authentication="name">Администратор</strong>
+      </div>
+    </div>
+
+    <!-- Сообщения -->
+    <div th:if="${success}" class="alert alert-success">
+      <i class="fas fa-check-circle"></i> <span th:text="${success}">Успех</span>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error">
+      <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}">Ошибка</span>
+    </div>
+
+    <!-- Статистика -->
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-icon">👥</div>
+        <div class="stat-number" th:text="${totalUsers}">0</div>
+        <div class="stat-label">Всего пользователей</div>
+      </div>
+
+      <div class="stat-card students">
+        <div class="stat-icon">🎓</div>
+        <div class="stat-number" th:text="${studentCount}">0</div>
+        <div class="stat-label">Студентов</div>
+      </div>
+
+      <div class="stat-card teachers">
+        <div class="stat-icon">👨‍🏫</div>
+        <div class="stat-number" th:text="${teacherCount}">0</div>
+        <div class="stat-label">Преподавателей</div>
+      </div>
+
+      <div class="stat-card admins">
+        <div class="stat-icon">🔧</div>
+        <div class="stat-number" th:text="${adminCount}">0</div>
+        <div class="stat-label">Администраторов</div>
+      </div>
+    </div>
+
+    <!-- Быстрые действия -->
+    <div class="quick-actions">
+      <h2 style="margin-bottom: 1rem;"><i class="fas fa-bolt"></i> Быстрые действия</h2>
+      <div class="actions-grid">
+        <a th:href="@{/users/create}" class="action-card">
+          <div class="action-icon">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div class="action-title">Создать пользователя</div>
+        </a>
+
+        <a th:href="@{/posts/create}" class="action-card">
+          <div class="action-icon">
+            <i class="fas fa-plus-circle"></i>
+          </div>
+          <div class="action-title">Создать пост</div>
+        </a>
+
+        <a th:href="@{/contact}" class="action-card">
+          <div class="action-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="action-title">Управление пользователями</div>
+        </a>
+
+        <a href="#" class="action-card" onclick="alert('В разработке')">
+          <div class="action-icon">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <div class="action-title">Статистика форума</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Недавние пользователи -->
+    <div class="recent-users">
+      <h2 style="margin-bottom: 1rem;"><i class="fas fa-user-clock"></i> Недавние пользователи</h2>
+
+      <div th:if="${recentUsers == null or recentUsers.isEmpty()}" class="empty-state">
+        <i class="fas fa-user-slash"></i>
+        <h3>Нет пользователей</h3>
+        <p>Создайте первого пользователя</p>
+      </div>
+
+      <div class="user-list" th:if="${recentUsers != null and not recentUsers.isEmpty()}">
+        <div th:each="user : ${recentUsers}" class="user-item">
+          <div class="user-avatar" th:text="${user.username.substring(0, 1).toUpperCase()}">A</div>
+          <div class="user-info">
+            <div class="user-name" th:text="${user.fullName != null and not user.fullName.isEmpty() ? user.fullName : user.username}">
+              Имя пользователя
+            </div>
+            <div class="user-role">
+                            <span th:each="role : ${user.roles}"
+                                  th:text="${role.name} + (${roleStat.last} ? '' : ', ')">
+                                Роль
+                            </span>
+            </div>
+          </div>
+          <div class="user-actions">
+            <a th:href="@{/admin/users/{id}/edit(id=${user.id})}"
+               class="action-btn"
+               style="padding: 0.5rem;">
+              <i class="fas fa-edit"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a th:href="@{/contact}" class="submit-btn" style="display: inline-block;">
+          <i class="fas fa-list"></i> Показать всех пользователей
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Обновление статистики каждые 30 секунд
+  setInterval(() => {
+    // Можно добавить AJAX запрос для обновления статистики
+    // location.reload(); // Простое решение - перезагрузка
+  }, 30000);
+</script>
+</body>
+</html>

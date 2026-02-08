@@ -1,98 +1,192 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Вход</title>
+  <title>Вход в систему</title>
   <meta charset="UTF-8" />
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <style>
     body {
-      background-color: #f0f0f0; /* Светлый фон для контраста */
-      font-family: Arial, sans-serif; /* Шрифт для всего документа */
-    }
-
-    .container {
-      max-width: 400px; /* Уменьшение ширины контейнера */
-      margin: 40px auto;
-      padding: 30px 40px;
-      width: 100%;
-      box-sizing: border-box;
-      background: white; /* Белый фон для контейнера */
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      backdrop-filter: blur(10px);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      gap: 20px; /* Уменьшение расстояния между элементами */
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
-    .container:hover {
-      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
-      transform: translateY(-8px);
+    .login-container {
+      width: 100%;
+      max-width: 400px;
     }
 
-    h2 {
-      color: #4F46E5; /* Заголовок в цвете 4F46E5 */
-      text-align: center; /* Центрирование заголовка */
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .logo {
+      margin-bottom: 30px;
+    }
+
+    .logo h1 {
+      color: #4F46E5;
+      font-size: 2rem;
+      margin-bottom: 5px;
+    }
+
+    .logo p {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #374151;
+      font-weight: 500;
     }
 
     input[type="text"], input[type="password"] {
-      padding: 10px;
-      border: 1px solid #4F46E5; /* Рамка полей ввода в цвет 4F46E5 */
-      border-radius: 5px; /* Закругление углов полей ввода */
-      width: 100%; /* Поля ввода занимают всю ширину контейнера */
-      box-sizing: border-box; /* Учет отступов и границ в ширине */
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s;
     }
 
     input[type="text"]:focus, input[type="password"]:focus {
-      border-color: #4F46E5; /* Цвет рамки при фокусе */
-      outline: none; /* Убираем стандартный контур */
+      border-color: #4F46E5;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
-    button {
-      background-color: #4F46E5; /* Цвет кнопки */
-      color: white; /* Цвет текста кнопки */
-      padding: 10px; /* Отступы внутри кнопки */
-      border: none; /* Убираем рамку */
-      border-radius: 5px; /* Закругление углов кнопки */
-      cursor: pointer; /* Указатель при наведении */
-      transition: background-color 0.3s ease; /* Плавный переход цвета */
-      width: 100%; /* Кнопка занимает всю ширину контейнера */
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #4F46E5 0%, #3c3bab 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    button:hover {
-      background-color: #3e3b9a; /* Темнее при наведении */
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
     }
 
-    .error {
-      color: red; /* Цвет текста ошибки */
-      text-align: center; /* Центрирование текста ошибки */
+    .login-btn:active {
+      transform: translateY(0);
     }
 
-    p {
-      text-align: center; /* Центрирование текста */
+    .error-message {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #fecaca;
     }
 
-    a {
-      color: #4F46E5; /* Цвет ссылки */
-      text-decoration: none; /* Убираем подчеркивание */
+    .info-message {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #a7f3d0;
     }
 
-    a:hover {
-      text-decoration: underline; /* Подчеркивание при наведении */
+    .admin-info {
+      background: #f0f9ff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      border: 1px solid #bae6fd;
+    }
+
+    .admin-info h3 {
+      color: #0369a1;
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+    }
+
+    .admin-info p {
+      color: #0c4a6e;
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .footer {
+      margin-top: 25px;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: #4F46E5;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <h2>Вход</h2>
-  <div th:if="${error}" class="error" th:text="${error}"></div>
-  <form th:action="@{/login}" method="post">
-    <input type="text" name="username" placeholder="Имя пользователя" required />
-    <input type="password" name="password" placeholder="Пароль" required />
-    <button type="submit">Войти</button>
-  </form>
-  <p>Нет аккаунта? <a th:href="@{/register}">Зарегистрироваться</a></p>
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo">
+      <h1>Форум</h1>
+      <p>Система обсуждений</p>
+    </div>
+
+    <div th:if="${error}" class="error-message">
+      <i class="fas fa-exclamation-circle"></i> <span th:text="${error}">Неверное имя пользователя или пароль</span>
+    </div>
+
+    <div th:if="${message}" class="info-message">
+      <i class="fas fa-check-circle"></i> <span th:text="${message}">Регистрация успешна</span>
+    </div>
+
+    <form th:action="@{/login}" method="post">
+      <div class="form-group">
+        <label for="username">Имя пользователя</label>
+        <input type="text" id="username" name="username" placeholder="Введите ваш логин" required autofocus />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" placeholder="Введите ваш пароль" required />
+      </div>
+
+      <button type="submit" class="login-btn">
+        <i class="fas fa-sign-in-alt"></i> Войти в систему
+      </button>
+    </form>
+
+    <div class="footer">
+      <p>Только авторизованные пользователи могут получить доступ к системе</p>
+      <p>Для получения учетной записи обратитесь к администратору</p>
+    </div>
+  </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 </body>
 </html>

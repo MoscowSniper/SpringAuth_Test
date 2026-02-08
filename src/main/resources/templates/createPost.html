@@ -50,14 +50,14 @@
 
 <div class="sidebar">
     <div class="sidebar-header">
-        <h2><a href="/" style="color: white; text-decoration: none;">Форум</a></h2>
+        <h2><a href="/hello" style="color: white; text-decoration: none;">Форум</a></h2>
         <div class="subtitle">Новый пост</div>
     </div>
 
     <ul class="sidebar-nav">
-        <li><a th:href="@{/posts}"><i class="fas fa-arrow-left"></i> Назад к постам</a></li>
-        <li><a th:href="@{/posts}"><i class="fas fa-stream"></i> Все посты</a></li>
-        <li><a th:href="@{/contact}"><i class="fas fa-users"></i> Пользователи</a></li>
+        <li><a th:href="@{/hello}" class="active"><i class="fas fa-home"></i> Главная</a></li>
+        <li><a th:href="@{/posts/create}"><i class="fas fa-plus-circle"></i> Создать пост</a></li>
+        <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Посты</a></li>
     </ul>
 
     <div class="user-info" style="margin-top: auto; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: 1rem;">

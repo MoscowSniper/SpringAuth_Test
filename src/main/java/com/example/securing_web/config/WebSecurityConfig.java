@@ -1,4 +1,4 @@
-package com.example.securing_web;
+package com.example.securing_web.config;
 
 import com.example.securing_web.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
@@ -25,19 +25,28 @@ public class WebSecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**").permitAll()
+                        .requestMatchers("/login", "/css/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/users/create").hasRole("ADMIN")
+                        .requestMatchers("/teacher/**").hasAnyRole("TEACHER", "ADMIN")
+                        .requestMatchers("/posts/create").hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                        .requestMatchers("/posts/delete/**").hasAnyRole("TEACHER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login?logout=true")
                         .permitAll()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedPage("/access-denied")
                 );
 
         return http.build();

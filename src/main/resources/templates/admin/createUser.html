@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Создание пользователя</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .create-user-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .form-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--clr-border);
+        }
+
+        .form-header h1 {
+            color: var(--clr-primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .role-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .role-option {
+            border: 2px solid var(--clr-border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .role-option:hover {
+            border-color: var(--clr-primary);
+            background: #f8fafc;
+        }
+
+        .role-option.selected {
+            border-color: var(--clr-primary);
+            background: #e0e7ff;
+        }
+
+        .role-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--clr-primary);
+        }
+
+        .role-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .role-desc {
+            font-size: 0.875rem;
+            color: var(--clr-text-light);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--clr-border);
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h2><a href="/static" style="color: white; text-decoration: none;">Форум</a></h2>
+        <div class="subtitle">Административная панель</div>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li><a th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt"></i> Панель управления</a></li>
+        <li><a th:href="@{/users/create}" class="active"><i class="fas fa-user-plus"></i> Создать пользователя</a></li>
+        <li><a th:href="@{/posts}"><i class="fas fa-comments"></i> Все посты</a></li>
+        <li><a th:href="@{/contact}"><i class="fas fa-users"></i> Пользователи</a></li>
+    </ul>
+
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </form>
+</div>
+
+<div class="main">
+    <div class="create-user-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h1><i class="fas fa-user-plus"></i> Создание нового пользователя</h1>
+                <p>Заполните форму для создания учетной записи пользователя</p>
+            </div>
+
+            <div th:if="${error}" class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}">Ошибка</span>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <span th:text="${success}">Успех</span>
+            </div>
+
+            <form th:action="@{/users/create}" method="post" id="createUserForm">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <div class="form-group">
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user"></i> Имя пользователя *
+                    </label>
+                    <input type="text" id="username" name="username"
+                           class="form-input" placeholder="Введите логин пользователя"
+                           required minlength="3" maxlength="50">
+                    <div class="form-hint">Латинские буквы, цифры и символы ._-</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock"></i> Пароль *
+                    </label>
+                    <input type="password" id="password" name="password"
+                           class="form-input" placeholder="Придумайте пароль"
+                           required minlength="6">
+                    <div class="form-hint">Минимум 6 символов</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fullName" class="form-label">
+                        <i class="fas fa-id-card"></i> Полное имя
+                    </label>
+                    <input type="text" id="fullName" name="fullName"
+                           class="form-input" placeholder="Имя Фамилия (необязательно)"
+                           maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user-tag"></i> Роль пользователя *
+                    </label>
+
+                    <div class="role-options">
+                        <label class="role-option" for="roleStudent">
+                            <input type="radio" id="roleStudent" name="role" value="ROLE_STUDENT" checked>
+                            <div class="role-icon">🎓</div>
+                            <div class="role-name">Студент</div>
+                            <div class="role-desc">Стандартные права: посты, комментарии</div>
+                        </label>
+
+                        <label class="role-option" for="roleTeacher">
+                            <input type="radio" id="roleTeacher" name="role" value="ROLE_TEACHER">
+                            <div class="role-icon">👨‍🏫</div>
+                            <div class="role-name">Преподаватель</div>
+                            <div class="role-desc">Может удалять посты, модерировать</div>
+                        </label>
+
+                        <label class="role-option" for="roleAdmin">
+                            <input type="radio" id="roleAdmin" name="role" value="ROLE_ADMIN">
+                            <div class="role-icon">🔧</div>
+                            <div class="role-name">Администратор</div>
+                            <div class="role-desc">Полный доступ ко всем функциям</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/admin/dashboard}" class="cancel-btn">
+                        <i class="fas fa-times"></i> Отмена
+                    </a>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-user-plus"></i> Создать пользователя
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Выбор роли
+        document.querySelectorAll('.role-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Убираем выделение у всех
+                document.querySelectorAll('.role-option').forEach(o => {
+                    o.classList.remove('selected');
+                });
+                // Добавляем выделение текущему
+                this.classList.add('selected');
+                // Активируем radio кнопку
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) radio.checked = true;
+            });
+
+            // Изначальное выделение выбранного
+            const radio = option.querySelector('input[type="radio"]');
+            if (radio && radio.checked) {
+                option.classList.add('selected');
+            }
+        });
+
+        // Валидация формы
+        const form = document.getElementById('createUserForm');
+        form.addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Пароль должен быть не менее 6 символов');
+                return false;
+            }
+            return true;
+        });
+    });
+</script>
+</body>
+</html>
